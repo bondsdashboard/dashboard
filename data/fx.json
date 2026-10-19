@@ -1,17 +1,7 @@
 [
  {
   "currency": "EUR",
-  "per_eur": 1.0,
-  "rate_date": "2026-10-19"
- },
- {
-  "currency": "JPY",
-  "per_eur": 177.63,
-  "rate_date": "2026-10-19"
- },
- {
-  "currency": "HKD",
-  "per_eur": 8.8097,
+  "per_eur": 1,
   "rate_date": "2026-10-19"
  },
  {
@@ -27,6 +17,16 @@
  {
   "currency": "CHF",
   "per_eur": 0.9261,
+  "rate_date": "2026-10-19"
+ },
+ {
+  "currency": "HKD",
+  "per_eur": 8.8097,
+  "rate_date": "2026-10-19"
+ },
+ {
+  "currency": "JPY",
+  "per_eur": 177.63,
   "rate_date": "2026-10-19"
  }
 ]
