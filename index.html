@@ -59,7 +59,7 @@ window.dash = (() => {
   const store = {};
   const calcs = {};
   const listeners = [];
-  const DEFAULTS = { status: 'live', issuer: null, ccy: null, esg: null, instrument: null, year: null, isin: null, colorby: 'currency', mixby: 'currency' };
+  const DEFAULTS = { status: 'live', issuer: null, ccy: null, esg: null, instrument: null, year: null, isin: null, colorby: 'currency', mixby: 'currency', cmin: null, cmax: null, ymin: null, ymax: null };
   let params = { ...DEFAULTS };
   const LIGHT = ['#2f6fdb', '#e07b39', '#1f9e74', '#c2417a', '#7a5bd6', '#b59a1c', '#3a9fb8', '#8c6b52'];
   const DARK = ['#6b9cff', '#f59a5c', '#43c496', '#e56a9e', '#9d82f0', '#d4b83a', '#5ec3dc', '#b8917a'];
@@ -247,6 +247,54 @@ window.dash = (() => {
 .gb .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;letter-spacing:.03em}
 @media (max-width:700px){.gb .hide-narrow{display:none}}
 
+/* ---------- sliders ---------- */
+.gb .gb-range{-webkit-appearance:none;appearance:none;width:100%;height:22px;background:transparent;margin:0;cursor:pointer;--pct:50%}
+.gb .gb-range:focus{outline:none}
+.gb .gb-range::-webkit-slider-runnable-track{height:3px;border-radius:2px;background:linear-gradient(to right,var(--gb-ink) 0 var(--pct),var(--gb-hair) var(--pct) 100%)}
+.gb .gb-range::-moz-range-track{height:3px;border-radius:2px;background:var(--gb-hair)}
+.gb .gb-range::-moz-range-progress{height:3px;border-radius:2px;background:var(--gb-ink)}
+.gb .gb-range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;border-radius:50%;background:var(--color-panel);border:2px solid var(--gb-ink);margin-top:-6.5px;transition:transform 120ms}
+.gb .gb-range::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:var(--color-panel);border:2px solid var(--gb-ink);transition:transform 120ms}
+.gb .gb-range:active::-webkit-slider-thumb{transform:scale(1.18)}
+.gb .gb-range:active::-moz-range-thumb{transform:scale(1.18)}
+.gb .gb-range:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 4px var(--gb-hair)}
+.gb .gb-dual{position:relative;height:22px;width:11rem}
+.gb .gb-dual::before{content:"";position:absolute;left:0;right:0;top:50%;height:3px;margin-top:-1.5px;border-radius:2px;background:var(--gb-hair)}
+.gb .gb-dual .fill{position:absolute;top:50%;height:3px;margin-top:-1.5px;background:var(--gb-ink);border-radius:2px}
+.gb .gb-dual .gb-range{position:absolute;inset:0;pointer-events:none}
+.gb .gb-dual .gb-range::-webkit-slider-runnable-track{background:transparent}
+.gb .gb-dual .gb-range::-moz-range-track{background:transparent}
+.gb .gb-dual .gb-range::-moz-range-progress{background:transparent}
+.gb .gb-dual .gb-range::-webkit-slider-thumb{pointer-events:auto}
+.gb .gb-dual .gb-range::-moz-range-thumb{pointer-events:auto}
+.gb .gb-flabel b{font-weight:500;text-transform:none;letter-spacing:0;color:var(--color-fg);margin-left:6px}
+
+/* ---------- simulator ---------- */
+.gb .gb-sim{border-color:var(--gb-c3)}
+.gb .gb-presets{display:flex;gap:4px;flex-wrap:wrap}
+.gb .gb-simgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:32px;align-items:start}
+@media (max-width:900px){.gb .gb-simgrid{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:640px){.gb .gb-simout{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.gb .gb-controls{display:flex;flex-direction:column;gap:20px}
+.gb .gb-sl-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:4px}
+.gb .gb-sl-top label{font-size:12.5px;color:var(--color-fg)}
+.gb .gb-sl-top b{font-family:var(--font-anthropic-serif);font-weight:400;font-size:1.3rem;letter-spacing:-0.01em}
+.gb .gb-sl-ends{display:flex;justify-content:space-between;font-size:10.5px;color:var(--color-fg-muted);margin-top:1px}
+.gb .gb-sl-note{font-size:11px;color:var(--color-fg-muted);margin-top:4px;min-height:1.3em}
+.gb .gb-simout{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--gb-hair);border:1px solid var(--gb-hair);border-radius:6px;overflow:hidden}
+.gb .gb-sbox{background:var(--color-panel);padding:14px 16px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.gb .gb-sbox .l{font-size:10.5px;font-weight:600;color:var(--color-fg-muted);letter-spacing:.1em;text-transform:uppercase}
+.gb .gb-sbox .v{font-family:var(--font-anthropic-serif);font-size:1.55rem;line-height:1.1;letter-spacing:-0.01em;transition:color 200ms}
+.gb .gb-sbox .v.up{color:var(--gb-c4)}
+.gb .gb-sbox .v.down{color:var(--gb-c5)}
+.gb .gb-sbox .s{font-size:11.5px;color:var(--color-fg-muted);line-height:1.4}
+.gb .gb-simcharts{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;margin-top:8px}
+@media (max-width:900px){.gb .gb-simcharts{grid-template-columns:minmax(0,1fr)}}
+.gb .gb-subt{font-size:12.5px;font-weight:600;margin:0}
+.gb .gb-subn{font-size:11.5px;color:var(--color-fg-muted);margin:3px 0 8px;display:flex;flex-wrap:wrap;gap:4px 14px}
+.gb .gb-key{display:inline-flex;gap:6px;align-items:center}
+.gb .gb-key i{display:inline-block;width:14px;height:3px;border-radius:1px}
+
 /* ---------- misc ---------- */
 .gb .gb-tip{position:absolute;pointer-events:none;background:var(--cds-surface-popover);border:1px solid var(--cds-border);border-radius:6px;box-shadow:var(--cds-shadow-popover);padding:8px 11px;font-size:12px;z-index:10;opacity:0;transition:opacity 120ms;max-width:18rem;min-width:11rem}
 .gb .gb-tip.on{opacity:1}
@@ -278,6 +326,8 @@ window.dash = (() => {
     <div class="gb-fgroup"><span class="gb-flabel">Issuer</span><div class="gb-chips" id="f-issuer" data-source="bonds"></div></div>
     <div class="gb-fgroup"><span class="gb-flabel">Currency</span><div class="gb-chips" id="f-ccy" data-source="bonds"></div></div>
     <div class="gb-fgroup"><span class="gb-flabel">ESG label</span><div class="gb-chips" id="f-esg" data-source="bonds"></div></div>
+    <div class="gb-fgroup"><span class="gb-flabel">Coupon<b id="r-cpn-v">—</b></span><div class="gb-dual" id="r-cpn"><div class="fill"></div><input class="gb-range lo" type="range" aria-label="Minimum coupon"><input class="gb-range hi" type="range" aria-label="Maximum coupon"></div></div>
+    <div class="gb-fgroup"><span class="gb-flabel">Maturity<b id="r-yr-v">—</b></span><div class="gb-dual" id="r-yr"><div class="fill"></div><input class="gb-range lo" type="range" aria-label="Earliest maturity year"><input class="gb-range hi" type="range" aria-label="Latest maturity year"></div></div>
     <div class="gb-fgroup"><span class="gb-flabel">Colour charts by</span><div class="gb-seg" id="f-color"></div></div>
     <div class="gb-fgroup gb-fsearch"><input id="f-q" class="gb-search" type="search" placeholder="Search ISIN, issuer, coupon, year…" aria-label="Search bonds"><button id="f-reset" class="gb-btn" type="button">Reset</button></div>
     <div class="gb-active" id="f-active"></div>
@@ -314,6 +364,23 @@ window.dash = (() => {
       <div class="gb-detail" id="c-detail" data-source="bonds bonds_eur"></div>
     </section>
   </div>
+
+  <section class="gb-card gb-sim" id="what-if">
+    <div class="gb-ch"><div><h2 class="gb-ct">What-if: refinancing &amp; FX</h2><p class="gb-cn">Move the sliders. Every bond is refinanced at maturity at your coupon and tenor; the comparison is rolling each bond at its current coupon. Uses the live bonds in the current filters.</p></div><div class="gb-presets" id="s-presets"></div></div>
+    <div class="gb-simgrid">
+      <div class="gb-controls">
+        <div><div class="gb-sl-top"><label for="s-cpn">New-issue coupon</label><b id="s-cpn-v">—</b></div><input class="gb-range" id="s-cpn" type="range" min="2" max="9" step="0.125"><div class="gb-sl-ends"><span>2%</span><span>9%</span></div></div>
+        <div><div class="gb-sl-top"><label for="s-ten">Tenor of new bonds</label><b id="s-ten-v">—</b></div><input class="gb-range" id="s-ten" type="range" min="2" max="8" step="1"><div class="gb-sl-ends"><span>2 yrs</span><span>8 yrs</span></div></div>
+        <div><div class="gb-sl-top"><label for="s-fx">EUR vs. other currencies</label><b id="s-fx-v">—</b></div><input class="gb-range" id="s-fx" type="range" min="-20" max="20" step="1"><div class="gb-sl-ends"><span>EUR −20%</span><span>EUR +20%</span></div><div class="gb-sl-note" id="s-fx-note"></div></div>
+        <div><div class="gb-sl-top"><label for="s-yr">Year to look at</label><b id="s-yr-v">—</b></div><input class="gb-range" id="s-yr" type="range" min="2027" max="2033" step="1"><div class="gb-sl-ends"><span>2027</span><span>2033</span></div></div>
+      </div>
+      <div class="gb-simout" id="s-out" data-source="bonds bonds_eur"></div>
+    </div>
+    <div class="gb-simcharts">
+      <div><h3 class="gb-subt">Annual coupon cost</h3><p class="gb-subn"><span class="gb-key"><i style="background:var(--gb-c1)"></i>Your scenario</span><span class="gb-key"><i style="background:var(--color-fg-muted)"></i>Rolled at today's coupons</span><span>· click a year</span></p><div class="gb-chart" id="s-cost" data-source="bonds bonds_eur" style="min-height:240px"></div></div>
+      <div><h3 class="gb-subt">Maturity profile after refinancing</h3><p class="gb-subn"><span class="gb-key"><i style="background:var(--gb-c6)"></i>Due today</span><span class="gb-key"><i style="background:var(--gb-c3)"></i>New bonds fall due</span></p><div class="gb-chart" id="s-wall" data-source="bonds bonds_eur" style="min-height:240px"></div></div>
+    </div>
+  </section>
 
   <section class="gb-card" id="timeline">
     <div class="gb-ch"><div><h2 class="gb-ct">Life of every bond</h2><p class="gb-cn">Issue to maturity; the solid part has already run · dashed line is today</p></div></div>
@@ -463,6 +530,10 @@ dash.calc('bonds_eur', {
         if (d.param !== skip && p[d.param] && d.key(r) !== p[d.param]) return false;
       }
       if (skip !== 'year' && p.year && r.year !== p.year) return false;
+      if (p.cmin != null && r.coupon < p.cmin) return false;
+      if (p.cmax != null && r.coupon > p.cmax) return false;
+      if (p.ymin != null && r.maturity && +r.year < p.ymin) return false;
+      if (p.ymax != null && (!r.maturity || +r.year > p.ymax)) return false;
       if (q) {
         const s = [r.isin, r.issuer, r.issuer_short, r.currency, r.coupon, r.esg, r.instrument, r.year, r.country].join(' ').toLowerCase();
         if (!s.includes(q)) return false;
@@ -561,6 +632,8 @@ dash.calc('bonds_eur', {
     const act = [];
     for (const [k, d] of Object.entries(DIMS)) if (p[d.param]) act.push([d.label + ': ' + p[d.param], { [d.param]: null }]);
     if (p.year) act.push(['Maturity year: ' + p.year, { year: null }]);
+    if (p.cmin != null || p.cmax != null) act.push([`Coupon: ${fmtCpn(p.cmin ?? BOUNDS.cmin)} – ${fmtCpn(p.cmax ?? BOUNDS.cmax)}`, { cmin: null, cmax: null }]);
+    if (p.ymin != null || p.ymax != null) act.push([`Maturity: ${p.ymin ?? BOUNDS.ymin} – ${p.ymax ?? BOUNDS.ymax}`, { ymin: null, ymax: null }]);
     if (p.isin) act.push(['Inspecting: ' + p.isin, { isin: null }]);
     $('#f-active').replaceChildren(...act.map(([t, clear]) => {
       const b = document.createElement('button'); b.type = 'button'; b.className = 'gb-pill'; b.textContent = t + '  ×';
@@ -570,7 +643,7 @@ dash.calc('bonds_eur', {
 
   $('#f-mix').addEventListener('change', (e) => dash.setParams({ mixby: e.target.value }));
   $('#f-q').addEventListener('input', (e) => { q = e.target.value.trim().toLowerCase(); draw(); });
-  $('#f-reset').addEventListener('click', () => { q = ''; $('#f-q').value = ''; dash.resetParams(); });
+  $('#f-reset').addEventListener('click', () => { q = ''; $('#f-q').value = ''; Object.assign(sim, SIM_DEF); dash.resetParams(); dash.setParams({ cmin: null, cmax: null, ymin: null, ymax: null }); });
 
   // ---------- KPIs + takeaway ----------
   function drawKpis(rows, all, p) {
@@ -985,8 +1058,211 @@ dash.calc('bonds_eur', {
     $('#t-note').textContent = `${data.length} of ${rows.length === 0 ? 0 : rows.length} bonds shown · sort by any column · click a row to inspect`;
   }
 
+  // ---------- range filters ----------
+  let BOUNDS = null;
+  function dual(id, onSet) {
+    const box = $('#' + id), lo = box.querySelector('.lo'), hi = box.querySelector('.hi'), fill = box.querySelector('.fill');
+    const paint = () => {
+      const a = +lo.min, b = +lo.max, span = b - a || 1;
+      const l = ((+lo.value - a) / span) * 100, h = ((+hi.value - a) / span) * 100;
+      fill.style.left = l + '%'; fill.style.width = Math.max(0, h - l) + '%';
+      lo.style.zIndex = +lo.value >= b - (b - a) * 0.05 ? 3 : 1;
+    };
+    const push = (e) => {
+      if (+lo.value > +hi.value) { if (e.target === lo) lo.value = hi.value; else hi.value = lo.value; }
+      paint();
+      onSet(+lo.value, +hi.value, +lo.min, +lo.max);
+    };
+    lo.addEventListener('input', push); hi.addEventListener('input', push);
+    return {
+      set(min, max, step, vlo, vhi) {
+        for (const i of [lo, hi]) { i.min = min; i.max = max; i.step = step; }
+        if (document.activeElement !== lo) lo.value = vlo;
+        if (document.activeElement !== hi) hi.value = vhi;
+        paint();
+      },
+    };
+  }
+  const near = (a, b) => Math.abs(a - b) < 1e-9;
+  const rCpn = dual('r-cpn', (l, h, a, b) => dash.setParams({ cmin: near(l, a) ? null : l, cmax: near(h, b) ? null : h }));
+  const rYr = dual('r-yr', (l, h, a, b) => dash.setParams({ ymin: near(l, a) ? null : l, ymax: near(h, b) ? null : h }));
+  function drawRanges(all, p) {
+    if (!BOUNDS) {
+      const yrs = all.filter((r) => r.maturity).map((r) => +r.year);
+      BOUNDS = { cmin: 0, cmax: Math.ceil(d3.max(all, (r) => r.coupon)), ymin: d3.min(yrs), ymax: d3.max(yrs) };
+    }
+    const c0 = p.cmin ?? BOUNDS.cmin, c1 = p.cmax ?? BOUNDS.cmax, y0 = p.ymin ?? BOUNDS.ymin, y1 = p.ymax ?? BOUNDS.ymax;
+    rCpn.set(BOUNDS.cmin, BOUNDS.cmax, 0.25, c0, c1);
+    rYr.set(BOUNDS.ymin, BOUNDS.ymax, 1, y0, y1);
+    $('#r-cpn-v').textContent = `${d3.format('.2f')(c0)}–${d3.format('.2f')(c1)}%`;
+    $('#r-yr-v').textContent = `${y0}–${y1}${p.ymax == null ? ' + perp.' : ''}`;
+  }
+
+  // ---------- what-if simulator ----------
+  const SIM_DEF = { cpn: 4.5, ten: 5, fx: 0, yr: 2030 };
+  const sim = { ...SIM_DEF };
+  const PRESETS = [['Cheaper funding · 3.5%', { cpn: 3.5 }], ['Like recent issues · 4.5%', { cpn: 4.5 }], ['Stress · 7%', { cpn: 7 }], ['Reset', SIM_DEF]];
+  const SL = [
+    { k: 'cpn', fmt: (v) => d3.format('.3~f')(v) + '%' },
+    { k: 'ten', fmt: (v) => v + ' yrs' },
+    { k: 'fx', fmt: (v) => (v > 0 ? 'EUR +' : v < 0 ? 'EUR −' : '±') + Math.abs(v) + '%' },
+    { k: 'yr', fmt: (v) => String(v) },
+  ];
+  let simRows = null;
+  const paintRange = (inp) => inp.style.setProperty('--pct', ((inp.value - inp.min) / (inp.max - inp.min)) * 100 + '%');
+  SL.forEach((sl) => {
+    const inp = $('#s-' + sl.k);
+    inp.addEventListener('input', () => { sim[sl.k] = +inp.value; drawSim(); });
+  });
+  $('#s-presets').append(...PRESETS.map(([label, v]) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'gb-chip'; b.textContent = label;
+    b.addEventListener('click', () => { Object.assign(sim, v); drawSim(); });
+    return b;
+  }));
+
+  function simModel(rows) {
+    const y0 = new Date().getUTCFullYear();
+    const live = rows.filter((r) => r.status !== 'Matured');
+    const fxf = (r) => (r.currency === 'EUR' ? 1 : 1 / (1 + sim.fx / 100));
+    const years = d3.range(y0, Math.max(2033, sim.yr) + 1);
+    const after = (r, y) => {
+      if (!r.maturity) return 0;
+      const a = Date.UTC(y, 0, 1), b = Date.UTC(y + 1, 0, 1), m = +r.maturity;
+      return m <= a ? 1 : m >= b ? 0 : (b - m) / (b - a);
+    };
+    const series = years.map((y) => {
+      let base = 0, scen = 0;
+      for (const r of live) {
+        const e = r.eur * fxf(r), f = after(r, y);
+        base += (e * r.coupon) / 100;
+        scen += (e * (r.coupon * (1 - f) + sim.cpn * f)) / 100;
+      }
+      return { y, base, scen, delta: scen - base };
+    });
+    const prof = new Map();
+    const add = (y, k, v) => { const o = prof.get(y) || { y, today: 0, after: 0 }; o[k] += v; prof.set(y, o); };
+    for (const r of live) if (r.maturity) {
+      const e = r.eur * fxf(r), my = r.maturity.getUTCFullYear();
+      add(my, 'today', e); add(my + sim.ten, 'after', e);
+    }
+    const ks = [...prof.keys()];
+    const profile = ks.length ? d3.range(d3.min(ks), d3.max(ks) + 1).map((y) => prof.get(y) || { y, today: 0, after: 0 }) : [];
+    return {
+      y0, series, profile, live,
+      nominal: d3.sum(live, (r) => r.eur * fxf(r)),
+      fxEffect: d3.sum(live, (r) => r.eur * (fxf(r) - 1)),
+      due: live.filter((r) => r.maturity && r.maturity.getUTCFullYear() <= sim.yr),
+      fxf,
+    };
+  }
+
+  const signed = (v) => (Math.abs(v) < 0.05 ? '±EUR 0m' : (v > 0 ? '+' : '−') + fmtEUR(Math.abs(v)));
+  function sbox(label, value, sub, tone) {
+    const b = el('div', 'gb-sbox');
+    const v = el('div', 'v' + (tone ? ' ' + tone : ''), value);
+    b.append(el('div', 'l', label), v, el('div', 's', sub));
+    return b;
+  }
+  const tone = (d) => (d > 0.05 ? 'up' : d < -0.05 ? 'down' : '');
+
+  function drawSim() {
+    SL.forEach((sl) => {
+      const inp = $('#s-' + sl.k);
+      if (document.activeElement !== inp) inp.value = sim[sl.k];
+      paintRange(inp);
+      $('#s-' + sl.k + '-v').textContent = sl.fmt(sim[sl.k]);
+    });
+    $('#s-fx-note').textContent = sim.fx === 0 ? 'FX at the ECB reference rates' : sim.fx > 0 ? 'EUR stronger: foreign-currency debt shrinks in EUR terms' : 'EUR weaker: foreign-currency debt grows in EUR terms';
+    document.querySelectorAll('#s-presets .gb-chip').forEach((b, i) => b.setAttribute('aria-pressed', i < 3 && PRESETS[i][1].cpn === sim.cpn ? 'true' : 'false'));
+    const out = $('#s-out'), cEl = $('#s-cost'), wEl = $('#s-wall');
+    if (!simRows) { failOrWait([out, cEl, wEl]); return; }
+    [out, cEl, wEl].forEach((e) => e.classList.remove('dash-skeleton'));
+    const m = simModel(simRows);
+    const at = m.series.find((x) => x.y === sim.yr) || m.series[m.series.length - 1];
+    const now0 = m.series[0];
+    const cum = d3.sum(m.series.filter((x) => x.y > m.y0 && x.y <= sim.yr), (x) => x.delta);
+    const dueAmt = d3.sum(m.due, (r) => r.eur * m.fxf(r));
+    out.replaceChildren(
+      sbox(`Coupon cost in ${sim.yr}`, fmtEUR(at.scen), `${signed(at.delta)} vs. rolling at today's coupons`, tone(at.delta)),
+      sbox(`Extra interest ${m.y0 + 1}–${sim.yr}`, signed(cum), 'Cumulative, vs. today’s coupons', tone(cum)),
+      sbox(`Weighted coupon in ${sim.yr}`, m.nominal ? fmtPct2((at.scen / m.nominal) * 100) : '—', `Today ${m.nominal ? fmtPct2((now0.base / m.nominal) * 100) : '—'}`, tone(at.delta)),
+      sbox(`To refinance by end-${sim.yr}`, fmtEUR(dueAmt), `${m.due.length} bond${m.due.length === 1 ? '' : 's'} · ${m.nominal ? d3.format('.0%')(dueAmt / m.nominal) : '—'} of nominal`),
+      sbox('Nominal in scope', fmtEUR(m.nominal), `${m.live.length} live bonds at your FX`),
+      sbox('FX effect on nominal', signed(m.fxEffect), sim.fx === 0 ? 'Move the FX slider' : 'Non-EUR bonds, in EUR', tone(m.fxEffect)),
+    );
+    drawSimCost(cEl, m);
+    drawSimWall(wEl, m);
+  }
+
+  function drawSimCost(elx, m) {
+    elx.replaceChildren();
+    const w = Math.max(300, elx.clientWidth), h = 240;
+    const svg = svgIn(elx, w, h);
+    const ys = m.series;
+    const ymax = d3.max(ys, (d) => Math.max(d.base, d.scen)) || 1;
+    const y = d3.scaleLinear([0, ymax * 1.12], [h - 24, 12]).nice();
+    const yt = y.ticks(4);
+    const ml = measure(svg, yt.map(fmtAxisEUR)) + 10;
+    const mr = 12;
+    const x = d3.scalePoint(ys.map((d) => d.y), [ml + 8, w - mr - 8]);
+    svg.append('g').selectAll('line').data(yt).join('line').attr('class', 'grid-l').attr('x1', ml).attr('x2', w - mr).attr('y1', (d) => y(d)).attr('y2', (d) => y(d));
+    svg.append('g').selectAll('text').data(yt).join('text').attr('class', 'tick-l').attr('x', ml - 8).attr('y', (d) => y(d)).attr('dy', '0.32em').attr('text-anchor', 'end').text(fmtAxisEUR);
+    svg.append('g').selectAll('text').data(ys).join('text').attr('class', 'tick-l').attr('x', (d) => x(d.y)).attr('y', h - 6).attr('text-anchor', 'middle')
+      .attr('font-weight', (d) => (d.y === sim.yr ? 600 : null)).style('fill', (d) => (d.y === sim.yr ? 'var(--color-fg)' : null)).text((d) => "'" + String(d.y).slice(2));
+    const area = d3.area().x((d) => x(d.y)).y0((d) => y(d.base)).y1((d) => y(d.scen));
+    const up = d3.sum(ys, (d) => d.delta) >= 0;
+    svg.append('path').datum(ys).attr('d', area).attr('fill', up ? PAL[3] : PAL[4]).attr('opacity', 0.16);
+    svg.append('path').datum(ys).attr('d', d3.line().x((d) => x(d.y)).y((d) => y(d.base))).attr('fill', 'none').attr('stroke', 'var(--color-fg-muted)').attr('stroke-width', 1.5).attr('stroke-dasharray', '4 3');
+    svg.append('path').datum(ys).attr('d', d3.line().x((d) => x(d.y)).y((d) => y(d.scen))).attr('fill', 'none').attr('stroke', PAL[0]).attr('stroke-width', 2.25).attr('stroke-linejoin', 'round').attr('stroke-linecap', 'round');
+    const sel = ys.find((d) => d.y === sim.yr);
+    if (sel) {
+      svg.append('line').attr('class', 'ref-l').attr('x1', x(sel.y)).attr('x2', x(sel.y)).attr('y1', 12).attr('y2', h - 24);
+      svg.append('circle').attr('cx', x(sel.y)).attr('cy', y(sel.base)).attr('r', 3.5).attr('fill', 'var(--color-panel)').attr('stroke', 'var(--color-fg-muted)').attr('stroke-width', 1.5);
+      svg.append('circle').attr('cx', x(sel.y)).attr('cy', y(sel.scen)).attr('r', 4.5).attr('fill', PAL[0]).attr('stroke', 'var(--color-panel)').attr('stroke-width', 2);
+    }
+    const step = x.step();
+    svg.append('g').selectAll('rect').data(ys).join('rect').attr('class', 'hit').attr('x', (d) => x(d.y) - step / 2).attr('width', step).attr('y', 12).attr('height', h - 36).attr('fill', 'transparent')
+      .on('mousemove', (event, d) => setTip(event, String(d.y), [
+        { color: PAL[0], label: 'Your scenario', value: fmtEUR(d.scen) },
+        { color: 'var(--color-fg-muted)', label: "Today's coupons", value: fmtEUR(d.base) },
+        { label: 'Difference', value: signed(d.delta) },
+      ]))
+      .on('mouseleave', hideTip)
+      .on('click', (event, d) => { sim.yr = Math.min(2033, Math.max(2027, d.y)); drawSim(); });
+  }
+
+  function drawSimWall(elx, m) {
+    elx.replaceChildren();
+    const data = m.profile;
+    if (!data.length) return;
+    const w = Math.max(300, elx.clientWidth), h = 240;
+    const svg = svgIn(elx, w, h);
+    const ymax = d3.max(data, (d) => Math.max(d.today, d.after)) || 1;
+    const y = d3.scaleLinear([0, ymax * 1.12], [h - 24, 12]).nice();
+    const yt = y.ticks(4);
+    const ml = measure(svg, yt.map(fmtAxisEUR)) + 10;
+    const x = d3.scaleBand(data.map((d) => String(d.y)), [ml, w - 4]).padding(0.22);
+    const inner = d3.scaleBand(['today', 'after'], [0, x.bandwidth()]).padding(0.12);
+    svg.append('g').selectAll('line').data(yt).join('line').attr('class', 'grid-l').attr('x1', ml).attr('x2', w - 4).attr('y1', (d) => y(d)).attr('y2', (d) => y(d));
+    svg.append('g').selectAll('text').data(yt).join('text').attr('class', 'tick-l').attr('x', ml - 8).attr('y', (d) => y(d)).attr('dy', '0.32em').attr('text-anchor', 'end').text(fmtAxisEUR);
+    const g = svg.append('g').selectAll('g').data(data).join('g').attr('transform', (d) => `translate(${x(String(d.y))},0)`);
+    g.append('rect').attr('x', inner('today')).attr('width', inner.bandwidth()).attr('y', (d) => y(d.today)).attr('height', (d) => y(0) - y(d.today)).attr('rx', 1.5).attr('fill', PAL[5]).attr('opacity', 0.55);
+    g.append('rect').attr('x', inner('after')).attr('width', inner.bandwidth()).attr('y', (d) => y(d.after)).attr('height', (d) => y(0) - y(d.after)).attr('rx', 1.5).attr('fill', PAL[2]);
+    svg.append('line').attr('class', 'axis-l').attr('x1', ml).attr('x2', w - 4).attr('y1', y(0)).attr('y2', y(0));
+    const every = Math.ceil(data.length / Math.max(1, Math.floor((w - ml) / 34)));
+    svg.append('g').selectAll('text').data(data.filter((_, i) => i % every === 0)).join('text').attr('class', 'tick-l')
+      .attr('x', (d) => x(String(d.y)) + x.bandwidth() / 2).attr('y', h - 6).attr('text-anchor', 'middle').text((d) => "'" + String(d.y).slice(2));
+    svg.append('g').selectAll('rect').data(data).join('rect').attr('class', 'hit').attr('x', (d) => x(String(d.y))).attr('width', x.bandwidth()).attr('y', 12).attr('height', h - 36).attr('fill', 'transparent')
+      .on('mousemove', (event, d) => setTip(event, String(d.y), [
+        { color: PAL[5], label: 'Due today', value: fmtEUR(d.today) },
+        { color: PAL[2], label: `New ${sim.ten}-yr bonds due`, value: fmtEUR(d.after) },
+      ]))
+      .on('mouseleave', hideTip);
+  }
+
   // ---------- main draw ----------
-  const chartEls = ['#c-wall', '#c-donut', '#c-legend', '#c-bubble', '#c-detail', '#c-gantt', '#c-vintage', '#c-cost'].map((s) => $(s));
+  const chartEls = ['#c-wall', '#c-donut', '#c-legend', '#c-bubble', '#c-detail', '#c-gantt', '#c-vintage', '#c-cost', '#s-out', '#s-cost', '#s-wall'].map((s) => $(s));
   function draw() {
     const all = merged();
     const p = P();
@@ -995,6 +1271,9 @@ dash.calc('bonds_eur', {
     const rows = filtered(all, p);
     const cs = scaleFor(all, p.colorby in DIMS ? p.colorby : 'currency');
     drawControls(all, p);
+    drawRanges(all, p);
+    simRows = filtered(all, { ...p, status: 'live' });
+    drawSim();
     drawKpis(rows, all, p);
     drawWall($('#c-wall'), filtered(all, p, 'year'), all, p, cs);
     drawMix($('#c-donut'), $('#c-legend'), filtered(all, p, DIMS[p.mixby in DIMS ? p.mixby : 'currency'].param), all, p);
