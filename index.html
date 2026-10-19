@@ -1,0 +1,980 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>grenke Issued Bonds</title>
+<meta name="description" content="Interactive dashboard of the bonds issued by the grenke group: maturities, coupons, currencies and ESG labels.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232f6fdb'/%3E%3Crect x='7' y='16' width='4' height='9' rx='1.5' fill='white'/%3E%3Crect x='14' y='10' width='4' height='15' rx='1.5' fill='white'/%3E%3Crect x='21' y='6' width='4' height='19' rx='1.5' fill='white'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<style>
+:root{
+  color-scheme: light;
+  --font-anthropic-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-anthropic-serif: "Source Serif 4", Georgia, serif;
+  --color-bg:#f6f6f3; --color-panel:#ffffff; --color-fg:#1c1c1a; --color-fg-muted:#6b6b66; --color-border-line:#e3e2dc;
+  --color-ok:#1f7a4d; --color-warn:#a3620a; --color-bad:#c0392b;
+  --cds-gap-xs:4px; --cds-gap-sm:8px; --cds-gap-md:14px; --cds-gap-lg:22px; --cds-gap-xl:32px;
+  --cds-pad-xs:6px; --cds-pad-sm:10px; --cds-pad-md:14px; --cds-pad-lg:20px; --cds-pad-xl:28px;
+  --cds-radius:12px;
+  --cds-font-size-caption:12.5px; --cds-font-size-body:14.5px; --cds-font-size-heading:16px; --cds-font-size-title:28px;
+  --cds-font-weight-medium:500;
+  --cds-chart-grid:#ecebe6; --cds-chart-axis:#c9c8c1; --cds-chart-reference:#8d8c86; --cds-chart-muted:#c9c8c1;
+  --cds-surface-popover:#ffffff; --cds-border:#dcdbd4; --cds-shadow-popover:0 8px 24px rgba(0,0,0,.12); --cds-text-secondary:#6b6b66;
+  --cds-dur-slow:420ms; --cds-ease-out:cubic-bezier(.2,.7,.2,1);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --color-bg:#141414; --color-panel:#1d1d1c; --color-fg:#ecebe6; --color-fg-muted:#9d9c96; --color-border-line:#2e2e2c;
+    --color-ok:#5cc28c; --color-warn:#e0a54a; --color-bad:#ef7564;
+    --cds-chart-grid:#2a2a28; --cds-chart-axis:#45453f; --cds-chart-reference:#8a8984; --cds-chart-muted:#45453f;
+    --cds-surface-popover:#262625; --cds-border:#3a3a37; --cds-shadow-popover:0 8px 24px rgba(0,0,0,.5); --cds-text-secondary:#9d9c96;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --color-bg:#141414; --color-panel:#1d1d1c; --color-fg:#ecebe6; --color-fg-muted:#9d9c96; --color-border-line:#2e2e2c;
+  --color-ok:#5cc28c; --color-warn:#e0a54a; --color-bad:#ef7564;
+  --cds-chart-grid:#2a2a28; --cds-chart-axis:#45453f; --cds-chart-reference:#8a8984; --cds-chart-muted:#45453f;
+  --cds-surface-popover:#262625; --cds-border:#3a3a37; --cds-shadow-popover:0 8px 24px rgba(0,0,0,.5); --cds-text-secondary:#9d9c96;
+}
+html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:var(--font-anthropic-sans);font-size:var(--cds-font-size-body);-webkit-font-smoothing:antialiased}
+#dash-root{--dash-gutter:clamp(16px,4vw,48px);padding:var(--dash-gutter);max-width:1440px;margin:0 auto;box-sizing:border-box}
+#dash-root *{box-sizing:border-box}
+.site-bar{display:flex;justify-content:flex-end;gap:8px;align-items:center;font-size:12.5px;color:var(--color-fg-muted);margin-bottom:8px}
+.site-bar button{font:inherit;padding:5px 10px;border-radius:999px;border:1px solid var(--color-border-line);background:var(--color-panel);color:var(--color-fg);cursor:pointer}
+.dash-skeleton{color:transparent !important;position:relative}
+.dash-skeleton::after{content:"";position:absolute;inset:20% 0 20% 0;max-width:60%;border-radius:6px;background:linear-gradient(90deg,var(--color-border-line),var(--color-panel),var(--color-border-line));background-size:200% 100%;animation:sk 1.2s linear infinite}
+.gb-chart.dash-skeleton::after,.gb-detail.dash-skeleton::after,.gb-legend.dash-skeleton::after{inset:0;max-width:none}
+@keyframes sk{to{background-position:-200% 0}}
+</style>
+<script>
+/* Small runtime the dashboard page code uses: loads data/*.json, runs the calculation, keeps filter state. */
+window.dash = (() => {
+  const store = {};
+  const calcs = {};
+  const listeners = [];
+  const DEFAULTS = { status: 'live', issuer: null, ccy: null, esg: null, instrument: null, year: null, isin: null, colorby: 'currency', mixby: 'currency' };
+  let params = { ...DEFAULTS };
+  const LIGHT = ['#2f6fdb', '#e07b39', '#1f9e74', '#c2417a', '#7a5bd6', '#b59a1c', '#3a9fb8', '#8c6b52'];
+  const DARK = ['#6b9cff', '#f59a5c', '#43c496', '#e56a9e', '#9d82f0', '#d4b83a', '#5ec3dc', '#b8917a'];
+  const isDark = () => {
+    const t = document.documentElement.dataset.theme;
+    if (t) return t === 'dark';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  };
+  const api = {
+    colors: [...(isDark() ? DARK : LIGHT)],
+    data: (id) => store[id] || { status: 'loading', data: [], refreshing: false, meta: [] },
+    onData: (fn) => { listeners.push(fn); safe(fn); },
+    calc: (id, def) => { calcs[id] = def; run(); },
+    loader: () => {},
+    params: () => ({ ...params }),
+    setParams: (p) => { params = { ...params, ...p }; notify(); },
+    resetParams: () => { params = { ...DEFAULTS }; notify(); },
+    refresh: () => {},
+    setLink: (name) => { try { history.replaceState(null, '', '#' + name); } catch (e) {} },
+  };
+  function safe(fn) { try { fn(); } catch (e) { console.error(e); } }
+  function notify() { fillMarks(); listeners.forEach(safe); }
+  function run() {
+    for (const [id, def] of Object.entries(calcs)) {
+      const ins = def.inputs.map((i) => store[i]);
+      if (ins.every((s) => s && s.status === 'ok')) {
+        try { store[id] = { status: 'ok', data: def.fn(...ins.map((s) => s.data)), meta: [] }; }
+        catch (e) { store[id] = { status: 'error', data: [], message: String(e) }; }
+      } else if (ins.some((s) => s && s.status === 'error')) store[id] = { status: 'error', data: [] };
+    }
+  }
+  function fillMarks() {
+    document.querySelectorAll('[data-source][data-field][data-row]').forEach((el) => {
+      const s = store[el.dataset.source];
+      if (s && s.status === 'ok' && s.data[+el.dataset.row]) el.textContent = s.data[+el.dataset.row][el.dataset.field];
+    });
+  }
+  async function load(id, url) {
+    try {
+      const r = await fetch(url + '?v=' + Date.now(), { cache: 'no-store' });
+      if (!r.ok) throw new Error(r.status);
+      const j = await r.json();
+      store[id] = { status: 'ok', data: Array.isArray(j) ? j : j.rows || j.data || j, meta: [] };
+    } catch (e) { store[id] = { status: 'error', data: [], message: String(e) }; }
+  }
+  window.addEventListener('DOMContentLoaded', async () => {
+    await Promise.all([load('bonds', 'data/bonds.json'), load('fx', 'data/fx.json'), load('meta', 'data/meta.json')]);
+    run(); notify();
+    const m = store.meta && store.meta.status === 'ok' ? store.meta.data : null;
+    const el = document.getElementById('site-updated');
+    if (el && m && m.checked_at) el.textContent = 'Data checked ' + new Date(m.checked_at).toLocaleString('en-IE', { dateStyle: 'medium', timeStyle: 'short' });
+  });
+  let t;
+  window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(notify, 150); });
+  const retheme = () => { api.colors.splice(0, 8, ...(isDark() ? DARK : LIGHT)); notify(); };
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', retheme);
+  api._toggleTheme = () => { document.documentElement.dataset.theme = isDark() ? 'light' : 'dark'; retheme(); };
+  return api;
+})();
+</script>
+</head>
+<body>
+<div id="dash-root">
+<div class="site-bar"><span id="site-updated"></span><button type="button" onclick="dash._toggleTheme()">◐ Theme</button></div>
+<style>
+#dash-root .gb{position:relative;font-family:var(--font-anthropic-sans);color:var(--color-fg);display:flex;flex-direction:column;gap:var(--cds-gap-lg);font-variant-numeric:tabular-nums}
+.gb .gb-head{display:flex;flex-direction:column;gap:var(--cds-gap-xs);padding-bottom:var(--cds-pad-sm);border-bottom:1px solid var(--color-border-line)}
+.gb .gb-eyebrow{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);letter-spacing:.08em;text-transform:uppercase}
+.gb .gb-title{font-family:var(--font-anthropic-serif);font-weight:400;font-size:2.4rem;line-height:1.1;margin:0}
+.gb .gb-take{font-size:var(--cds-font-size-heading);color:var(--color-fg);max-width:62rem;margin:0;line-height:1.45;min-height:1.5em}
+.gb .gb-take b{font-weight:600}
+.gb .gb-asof{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted)}
+.gb .gb-filters{display:flex;flex-wrap:wrap;gap:var(--cds-gap-md) var(--cds-gap-lg);align-items:flex-end;background:var(--color-panel);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);padding:var(--cds-pad-md) var(--cds-pad-lg)}
+.gb .gb-fgroup{display:flex;flex-direction:column;gap:var(--cds-gap-xs)}
+.gb .gb-flabel{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted)}
+.gb .gb-seg,.gb .gb-chips{display:flex;flex-wrap:wrap;gap:4px}
+.gb .gb-chip{font:inherit;font-size:var(--cds-font-size-caption);padding:4px 10px;border-radius:999px;border:1px solid var(--color-border-line);background:var(--color-bg);color:var(--color-fg);cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background var(--cds-dur-slow),border-color var(--cds-dur-slow)}
+.gb .gb-chip:hover{border-color:var(--color-fg-muted)}
+.gb .gb-chip[aria-pressed=true]{background:var(--color-fg);color:var(--color-bg);border-color:var(--color-fg)}
+.gb .gb-sw{width:8px;height:8px;border-radius:50%;flex:none;display:inline-block}
+.gb .gb-fsearch{flex-direction:row;align-items:center;gap:var(--cds-gap-sm);margin-left:auto}
+.gb .gb-search{font:inherit;font-size:var(--cds-font-size-caption);padding:6px 10px;border-radius:var(--cds-radius);border:1px solid var(--color-border-line);background:var(--color-bg);color:var(--color-fg);min-width:14rem}
+.gb .gb-btn{font:inherit;font-size:var(--cds-font-size-caption);padding:6px 12px;border-radius:var(--cds-radius);border:1px solid var(--color-border-line);background:var(--color-bg);color:var(--color-fg);cursor:pointer}
+.gb .gb-btn:hover{border-color:var(--color-fg-muted)}
+.gb .gb-active{flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px;min-height:0}
+.gb .gb-active:empty{display:none}
+.gb .gb-pill{font:inherit;font-size:var(--cds-font-size-caption);padding:3px 10px;border-radius:999px;border:1px dashed var(--color-fg-muted);background:transparent;color:var(--color-fg);cursor:pointer}
+.gb .gb-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,11rem),1fr));gap:var(--cds-gap-md)}
+.gb .gb-kpi{background:var(--color-panel);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);padding:var(--cds-pad-md) var(--cds-pad-lg);display:flex;flex-direction:column;gap:4px;position:relative;overflow:hidden}
+.gb .gb-kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gb-accent,transparent)}
+.gb .gb-klabel{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted)}
+.gb .gb-kval{font-family:var(--font-anthropic-serif);font-weight:400;font-size:var(--cds-font-size-title);line-height:1.15;min-height:1.2em}
+.gb .gb-ksub{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);min-height:1.3em}
+.gb .gb-grid{display:grid;gap:var(--cds-gap-md);grid-template-columns:minmax(0,1.7fr) minmax(0,1fr)}
+.gb .gb-grid.even{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+@media (max-width:900px){.gb .gb-grid,.gb .gb-grid.even{grid-template-columns:minmax(0,1fr)}.gb .gb-fsearch{margin-left:0}}
+.gb .gb-card{background:var(--color-panel);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);padding:var(--cds-pad-lg);display:flex;flex-direction:column;gap:var(--cds-gap-sm);min-width:0}
+.gb .gb-ch{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--cds-gap-sm);flex-wrap:wrap}
+.gb .gb-ct{font-size:var(--cds-font-size-heading);font-weight:var(--cds-font-weight-medium);margin:0}
+.gb .gb-cn{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);margin:2px 0 0}
+.gb .gb-chart{position:relative;width:100%}
+.gb .gb-chart svg{display:block;overflow:visible}
+.gb .gb-chart .tick-l{fill:var(--color-fg-muted);font-size:var(--cds-font-size-caption)}
+.gb .gb-chart .val-l{fill:var(--color-fg);font-size:var(--cds-font-size-caption)}
+.gb .gb-chart .grid-l{stroke:var(--cds-chart-grid);stroke-width:1}
+.gb .gb-chart .axis-l{stroke:var(--cds-chart-axis);stroke-width:1}
+.gb .gb-chart .ref-l{stroke:var(--cds-chart-reference);stroke-width:1;stroke-dasharray:4 4}
+.gb .gb-chart .hit{cursor:pointer}
+.gb .gb-mix{display:flex;gap:var(--cds-gap-lg);align-items:center;flex-wrap:wrap}
+.gb .gb-donut{flex:0 0 auto;width:min(100%,220px)}
+.gb .gb-legend{flex:1 1 10rem;display:flex;flex-direction:column;gap:2px;min-width:0}
+.gb .gb-lrow{font:inherit;display:grid;grid-template-columns:10px 1fr auto auto;gap:8px;align-items:center;padding:5px 6px;border-radius:6px;border:0;background:transparent;color:var(--color-fg);cursor:pointer;text-align:left;font-size:var(--cds-font-size-caption)}
+.gb .gb-lrow:hover,.gb .gb-lrow[aria-pressed=true]{background:var(--color-bg)}
+.gb .gb-lrow .muted{color:var(--color-fg-muted)}
+.gb .gb-select{font:inherit;font-size:var(--cds-font-size-caption);padding:4px 8px;border-radius:var(--cds-radius);border:1px solid var(--color-border-line);background:var(--color-bg);color:var(--color-fg)}
+.gb .gb-detail{display:flex;flex-direction:column;gap:var(--cds-gap-md);min-height:330px}
+.gb .gb-dtop{display:flex;justify-content:space-between;gap:var(--cds-gap-sm);align-items:flex-start}
+.gb .gb-dissuer{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted)}
+.gb .gb-dbig{display:flex;align-items:baseline;gap:var(--cds-gap-md);flex-wrap:wrap}
+.gb .gb-dcpn{font-family:var(--font-anthropic-serif);font-size:2.6rem;line-height:1}
+.gb .gb-damt{font-family:var(--font-anthropic-serif);font-size:var(--cds-font-size-title);color:var(--color-fg-muted)}
+.gb .gb-isin{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--cds-font-size-caption);letter-spacing:.04em;color:var(--color-fg-muted)}
+.gb .gb-badges{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.gb .gb-badge{font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid var(--color-border-line);color:var(--color-fg-muted);white-space:nowrap}
+.gb .gb-badge.ok{color:var(--color-ok);border-color:currentColor}
+.gb .gb-badge.warn{color:var(--color-warn);border-color:currentColor}
+.gb .gb-badge.bad{color:var(--color-bad);border-color:currentColor}
+.gb .gb-life{display:flex;flex-direction:column;gap:6px}
+.gb .gb-track{position:relative;height:10px;border-radius:999px;background:var(--color-bg);border:1px solid var(--color-border-line);overflow:hidden}
+.gb .gb-fill{position:absolute;left:0;top:0;bottom:0;border-radius:999px}
+.gb .gb-lifel{display:flex;justify-content:space-between;font-size:var(--cds-font-size-caption);color:var(--color-fg-muted)}
+.gb .gb-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--cds-gap-sm) var(--cds-gap-md);margin:0}
+.gb .gb-fact{display:flex;flex-direction:column;gap:2px;min-width:0}
+.gb .gb-fact dt{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted)}
+.gb .gb-fact dd{margin:0;font-size:var(--cds-font-size-body);overflow:hidden;text-overflow:ellipsis}
+.gb .gb-dnav{display:flex;gap:6px;margin-top:auto;align-items:center}
+.gb .gb-dnav span{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);margin-left:auto}
+.gb .gb-tablewrap{max-height:30rem;overflow:auto;border-radius:var(--cds-radius)}
+.gb .gb-table{width:100%;border-collapse:collapse;font-size:var(--cds-font-size-caption)}
+.gb .gb-table th{position:sticky;top:0;background:var(--color-panel);text-align:left;font-weight:var(--cds-font-weight-medium);color:var(--color-fg-muted);border-bottom:1px solid var(--color-border-line);padding:0;white-space:nowrap;z-index:1}
+.gb .gb-table th button{font:inherit;color:inherit;background:none;border:0;padding:8px 10px;cursor:pointer;width:100%;text-align:inherit}
+.gb .gb-table th.num,.gb .gb-table td.num{text-align:right}
+.gb .gb-table td{padding:8px 10px;border-bottom:1px solid var(--color-border-line);white-space:nowrap}
+.gb .gb-table tbody tr{cursor:pointer;transition:background var(--cds-dur-slow)}
+.gb .gb-table tbody tr:hover{background:var(--color-bg)}
+.gb .gb-table tbody tr.sel{background:var(--color-bg);box-shadow:inset 3px 0 0 var(--color-fg)}
+.gb .gb-table tbody tr.matured{color:var(--color-fg-muted)}
+.gb .gb-cellbar{display:flex;align-items:center;gap:8px;justify-content:flex-end}
+.gb .gb-cellbar i{display:block;height:6px;border-radius:3px;background:var(--gb-bar)}
+.gb .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.gb .hide-narrow{}
+@media (max-width:700px){.gb .hide-narrow{display:none}}
+.gb .gb-tip{position:absolute;pointer-events:none;background:var(--cds-surface-popover);border:1px solid var(--cds-border);border-radius:var(--cds-radius);box-shadow:var(--cds-shadow-popover);padding:var(--cds-pad-xs) var(--cds-pad-sm);font-size:var(--cds-font-size-caption);z-index:10;opacity:0;transition:opacity 120ms;max-width:18rem}
+.gb .gb-tip.on{opacity:1}
+.gb .gb-tip .tt{color:var(--cds-text-secondary);margin-bottom:3px}
+.gb .gb-tip .tl{display:flex;gap:6px;align-items:center;justify-content:space-between}
+.gb .gb-tip .tl span:first-child{display:flex;gap:6px;align-items:center}
+.gb .gb-foot{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);line-height:1.5}
+.gb .gb-fail{display:flex;align-items:center;justify-content:center;gap:6px;color:var(--color-fg-muted);font-size:var(--cds-font-size-caption);min-height:inherit;height:100%}
+.gb .gb-fail::before{content:"";width:.375rem;height:.375rem;border-radius:50%;background:var(--color-bad)}
+.gb [data-dash-source-state=refreshing]{opacity:.5;transition:opacity var(--cds-dur-slow)}
+.gb [data-dash-source-state=empty]{color:transparent}
+@media (prefers-reduced-motion:no-preference){
+  @keyframes gb-rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .gb.gb-in .gb-kpi,.gb.gb-in .gb-card{animation:gb-rise var(--cds-dur-slow) var(--cds-ease-out) both}
+  .gb.gb-in .gb-kpi:nth-child(2){animation-delay:40ms}.gb.gb-in .gb-kpi:nth-child(3){animation-delay:80ms}.gb.gb-in .gb-kpi:nth-child(4){animation-delay:120ms}.gb.gb-in .gb-kpi:nth-child(5){animation-delay:160ms}.gb.gb-in .gb-kpi:nth-child(6){animation-delay:200ms}
+}
+</style>
+
+<div class="gb" id="gb">
+  <header class="gb-head" id="overview">
+    <div class="gb-eyebrow">grenke group · Debt capital markets</div>
+    <h1 class="gb-title">Issued bonds</h1>
+    <p class="gb-take dash-skeleton" id="gb-take" data-source="bonds bonds_eur">—</p>
+    <div class="gb-asof">EUR equivalents at ECB reference rates of <span data-source="fx" data-field="rate_date" data-row="0">—</span> · bond terms as published on grenke.com</div>
+  </header>
+
+  <section class="gb-filters" id="filters" aria-label="Filters">
+    <div class="gb-fgroup"><span class="gb-flabel">Status</span><div class="gb-seg" id="f-status"></div></div>
+    <div class="gb-fgroup"><span class="gb-flabel">Issuer</span><div class="gb-chips" id="f-issuer" data-source="bonds"></div></div>
+    <div class="gb-fgroup"><span class="gb-flabel">Currency</span><div class="gb-chips" id="f-ccy" data-source="bonds"></div></div>
+    <div class="gb-fgroup"><span class="gb-flabel">ESG label</span><div class="gb-chips" id="f-esg" data-source="bonds"></div></div>
+    <div class="gb-fgroup"><span class="gb-flabel">Colour charts by</span><div class="gb-seg" id="f-color"></div></div>
+    <div class="gb-fgroup gb-fsearch"><input id="f-q" class="gb-search" type="search" placeholder="Search ISIN, issuer, coupon, year…" aria-label="Search bonds"><button id="f-reset" class="gb-btn" type="button">Reset</button></div>
+    <div class="gb-active" id="f-active"></div>
+  </section>
+
+  <section class="gb-kpis" id="kpis" data-source="bonds bonds_eur">
+    <div class="gb-kpi"><div class="gb-klabel">Nominal outstanding (EUR eq.)</div><div class="gb-kval dash-skeleton" id="k1">—</div><div class="gb-ksub" id="k1s"></div></div>
+    <div class="gb-kpi"><div class="gb-klabel">Weighted avg. coupon</div><div class="gb-kval dash-skeleton" id="k2">—</div><div class="gb-ksub" id="k2s"></div></div>
+    <div class="gb-kpi"><div class="gb-klabel">Weighted avg. life</div><div class="gb-kval dash-skeleton" id="k3">—</div><div class="gb-ksub" id="k3s"></div></div>
+    <div class="gb-kpi"><div class="gb-klabel">Annual coupon cost</div><div class="gb-kval dash-skeleton" id="k4">—</div><div class="gb-ksub" id="k4s"></div></div>
+    <div class="gb-kpi"><div class="gb-klabel">ESG-labelled share</div><div class="gb-kval dash-skeleton" id="k5">—</div><div class="gb-ksub" id="k5s"></div></div>
+    <div class="gb-kpi"><div class="gb-klabel">Next redemption</div><div class="gb-kval dash-skeleton" id="k6">—</div><div class="gb-ksub" id="k6s"></div></div>
+  </section>
+
+  <div class="gb-grid">
+    <section class="gb-card" id="maturity-wall">
+      <div class="gb-ch"><div><h2 class="gb-ct">Maturity wall</h2><p class="gb-cn">Nominal due per year, EUR equivalent · click a year to filter everything</p></div></div>
+      <div class="gb-chart" id="c-wall" data-source="bonds bonds_eur" style="min-height:280px"></div>
+    </section>
+    <section class="gb-card" id="mix">
+      <div class="gb-ch"><div><h2 class="gb-ct">Funding mix</h2><p class="gb-cn">Share of nominal · click a slice or row to filter</p></div>
+        <select class="gb-select" id="f-mix" aria-label="Mix by"><option value="currency">By currency</option><option value="issuer">By issuer</option><option value="esg">By ESG label</option><option value="instrument">By instrument</option></select></div>
+      <div class="gb-mix"><div class="gb-donut gb-chart" id="c-donut" data-source="bonds bonds_eur" style="min-height:220px"></div><div class="gb-legend" id="c-legend" data-source="bonds bonds_eur"></div></div>
+    </section>
+  </div>
+
+  <div class="gb-grid">
+    <section class="gb-card" id="coupon-map">
+      <div class="gb-ch"><div><h2 class="gb-ct">Coupon vs. maturity</h2><p class="gb-cn">Each bubble is a bond, sized by EUR nominal · click one to inspect it</p></div></div>
+      <div class="gb-chart" id="c-bubble" data-source="bonds bonds_eur" style="min-height:320px"></div>
+    </section>
+    <section class="gb-card" id="bond-detail">
+      <div class="gb-ch"><div><h2 class="gb-ct">Bond inspector</h2><p class="gb-cn" id="d-hint">Next maturing bond, or the one you pick</p></div></div>
+      <div class="gb-detail" id="c-detail" data-source="bonds bonds_eur"></div>
+    </section>
+  </div>
+
+  <section class="gb-card" id="timeline">
+    <div class="gb-ch"><div><h2 class="gb-ct">Life of every bond</h2><p class="gb-cn">Issue to maturity; the solid part has already run · dashed line is today</p></div></div>
+    <div class="gb-chart" id="c-gantt" data-source="bonds bonds_eur" style="min-height:200px"></div>
+  </section>
+
+  <div class="gb-grid even">
+    <section class="gb-card" id="vintage">
+      <div class="gb-ch"><div><h2 class="gb-ct">Issuance by vintage</h2><p class="gb-cn">Bars: EUR nominal issued per year · line: weighted coupon of that year's issues</p></div></div>
+      <div class="gb-chart" id="c-vintage" data-source="bonds bonds_eur" style="min-height:260px"></div>
+    </section>
+    <section class="gb-card" id="coupon-cost">
+      <div class="gb-ch"><div><h2 class="gb-ct">Annual coupon cost</h2><p class="gb-cn" id="cost-note">EUR m per year, by the colour grouping</p></div></div>
+      <div class="gb-chart" id="c-cost" data-source="bonds bonds_eur" style="min-height:220px"></div>
+    </section>
+  </div>
+
+  <section class="gb-card" id="bond-table">
+    <div class="gb-ch"><div><h2 class="gb-ct">All bonds</h2><p class="gb-cn" id="t-note">Sort by any column · click a row to inspect</p></div><button class="gb-btn" id="t-csv" type="button">Copy as CSV</button></div>
+    <div class="gb-tablewrap">
+      <table class="gb-table" id="t-bonds" data-source="bonds" data-row-key="isin">
+        <thead><tr>
+          <th data-field="isin" data-k="isin"><button type="button">ISIN</button></th>
+          <th data-field="issuer_short" data-k="issuer_short"><button type="button">Issuer</button></th>
+          <th data-field="currency" data-k="currency"><button type="button">Ccy</button></th>
+          <th class="num hide-narrow" data-field="amount_m" data-k="amount"><button type="button">Amount (m, local)</button></th>
+          <th class="num" data-source="bonds_eur" data-field="amount_eur_m" data-k="eur"><button type="button">EUR eq. (m)</button></th>
+          <th class="num" data-field="coupon_pct" data-k="coupon"><button type="button">Coupon</button></th>
+          <th class="hide-narrow" data-field="issue_date" data-k="issue"><button type="button">Issued</button></th>
+          <th data-field="maturity_date" data-k="maturity"><button type="button">Maturity</button></th>
+          <th class="num" data-source="bonds_eur" data-field="years_left" data-k="left"><button type="button">Years left</button></th>
+          <th class="num hide-narrow" data-source="bonds_eur" data-field="annual_coupon_eur_m" data-k="cost"><button type="button">Coupon / yr (EUR m)</button></th>
+          <th data-field="esg" data-k="esg"><button type="button">ESG</button></th>
+          <th data-source="bonds_eur" data-field="status" data-k="status"><button type="button">Status</button></th>
+        </tr></thead>
+        <tbody id="t-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <p class="gb-foot">Source: grenke AG, "Issued bonds" overview (main publicly issued bonds of the group's European and international issuing entities). Non-EUR bonds converted at ECB euro reference rates; amounts are nominal, not market value. The AT1 bond is perpetual: it counts toward nominal and coupon cost but not toward weighted average life or the maturity years. Indicative analysis, not an official grenke report.</p>
+
+  <div class="gb-tip" id="gb-tip" role="tooltip"></div>
+</div>
+
+<script>
+// ---- EUR equivalents, coupon cost, tenor and time left (shown to readers in Sources) ----
+dash.calc('bonds_eur', {
+  inputs: ['bonds', 'fx'],
+  title: 'Bonds in EUR terms',
+  description: 'Each bond converted to EUR at the ECB reference rate, its annual coupon cost, tenor, years left from today and status.',
+  fn: (bonds, fx) => {
+    const perEur = Object.fromEntries(fx.map((r) => [r.currency, Number(r.per_eur)]));
+    const now = Date.now();
+    const year = 365.25 * 86400000;
+    return bonds.map((b) => {
+      const eur = Number(b.amount_m) / perEur[b.currency];
+      const issue = Date.parse(b.issue_date);
+      const mat = b.maturity_date ? Date.parse(b.maturity_date) : null;
+      return {
+        isin: b.isin,
+        amount_eur_m: Math.round(eur * 100) / 100,
+        annual_coupon_eur_m: Math.round(eur * Number(b.coupon_pct)) / 100,
+        tenor_years: mat == null ? null : Math.round(((mat - issue) / year) * 100) / 100,
+        years_left: mat == null ? null : Math.max(0, Math.round(((mat - now) / year) * 100) / 100),
+        status: mat == null ? 'Perpetual' : mat < now ? 'Matured' : 'Outstanding',
+      };
+    });
+  },
+});
+
+</script>
+
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const root = $('#gb');
+  const tip = $('#gb-tip');
+  const DAY = 864e5;
+  const DIMS = {
+    currency: { label: 'Currency', key: (r) => r.currency, param: 'ccy' },
+    issuer: { label: 'Issuer', key: (r) => r.issuer_short, param: 'issuer' },
+    esg: { label: 'ESG label', key: (r) => r.esg, param: 'esg' },
+    instrument: { label: 'Instrument', key: (r) => r.instrument, param: 'instrument' },
+  };
+  const ESG_ORDER = ['Green', 'Social', 'Sustainable', 'Conventional'];
+  let q = '';
+  const sort = { key: 'maturity', dir: 1 };
+  let animated = false;
+  let linked = false;
+
+  const fmtInt = d3.format(',');
+  const fmtEUR = (m) => {
+    if (m == null || !isFinite(m)) return '—';
+    if (Math.abs(m) >= 1000) return 'EUR ' + d3.format(',.2f')(m / 1000) + 'bn';
+    return 'EUR ' + (Math.abs(m) < 100 ? d3.format(',.1f')(m) : fmtInt(Math.round(m))) + 'm';
+  };
+  const fmtAxisEUR = (m) => (m >= 1000 ? d3.format(',.1~f')(m / 1000) + 'bn' : fmtInt(m) + 'm');
+  const fmtCpn = (v) => (v == null || !isFinite(v) ? '—' : d3.format('.3~f')(v) + '%');
+  const fmtPct2 = (v) => (v == null || !isFinite(v) ? '—' : d3.format('.2f')(v) + '%');
+  const fmtDate = (d) => (d ? d3.utcFormat('%-d %b %Y')(d) : 'Perpetual');
+  const fmtYrs = (y) => (y == null || !isFinite(y) ? '—' : d3.format('.1f')(y) + ' yrs');
+  const fmtLocal = (c, a) => c + ' ' + d3.format(',.2~f')(a) + 'm';
+
+  // ---------- helpers ----------
+  const P = () => ({ status: 'live', colorby: 'currency', mixby: 'currency', ...dash.params() });
+
+  function merged() {
+    const b = dash.data('bonds');
+    const c = dash.data('bonds_eur');
+    if (b.status !== 'ok' || c.status !== 'ok' || !Array.isArray(c.data)) return null;
+    const calc = new Map(c.data.map((r) => [r.isin, r]));
+    return b.data.map((r) => {
+      const k = calc.get(r.isin) || {};
+      return {
+        isin: r.isin,
+        issuer: r.issuer,
+        issuer_short: r.issuer_short,
+        country: r.country,
+        programme: r.programme,
+        instrument: r.instrument,
+        currency: r.currency,
+        amount: Number(r.amount_m),
+        coupon: Number(r.coupon_pct),
+        issue: new Date(r.issue_date),
+        maturity: r.maturity_date ? new Date(r.maturity_date) : null,
+        esg: r.esg || 'Conventional',
+        eur: Number(k.amount_eur_m),
+        cost: Number(k.annual_coupon_eur_m),
+        tenor: k.tenor_years == null ? null : Number(k.tenor_years),
+        left: k.years_left == null ? null : Number(k.years_left),
+        status: k.status,
+        year: r.maturity_date ? r.maturity_date.slice(0, 4) : 'Perp.',
+        issueYear: r.issue_date.slice(0, 4),
+      };
+    });
+  }
+
+  function filtered(all, p, skip) {
+    return all.filter((r) => {
+      if (p.status === 'live' && r.status === 'Matured') return false;
+      if (p.status === 'matured' && r.status !== 'Matured') return false;
+      for (const d of Object.values(DIMS)) {
+        if (d.param !== skip && p[d.param] && d.key(r) !== p[d.param]) return false;
+      }
+      if (skip !== 'year' && p.year && r.year !== p.year) return false;
+      if (q) {
+        const s = [r.isin, r.issuer, r.issuer_short, r.currency, r.coupon, r.esg, r.instrument, r.year, r.country].join(' ').toLowerCase();
+        if (!s.includes(q)) return false;
+      }
+      return true;
+    });
+  }
+
+  function scaleFor(all, dim) {
+    const d = DIMS[dim];
+    let dom = d3.rollups(all, (v) => d3.sum(v, (r) => r.eur), d.key).sort((a, b) => b[1] - a[1]).map((x) => x[0]);
+    if (dim === 'esg') dom = ESG_ORDER.filter((x) => dom.includes(x));
+    return { dim: d, domain: dom, color: (k) => dash.colors[Math.max(0, dom.indexOf(k)) % dash.colors.length] };
+  }
+
+  function toggle(name, value) {
+    const cur = dash.params()[name] ?? null;
+    dash.setParams({ [name]: cur === value ? null : value });
+  }
+
+  function svgIn(el, w, h) {
+    return d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${w} ${h}`).attr('preserveAspectRatio', 'xMinYMin meet');
+  }
+  function measure(svg, texts) {
+    const t = svg.append('text').attr('class', 'tick-l');
+    let m = 0;
+    for (const s of texts) { t.text(s); m = Math.max(m, t.node().getComputedTextLength()); }
+    t.remove();
+    return m;
+  }
+
+  function setTip(event, title, lines) {
+    tip.replaceChildren();
+    const t = document.createElement('div'); t.className = 'tt'; t.textContent = title; tip.append(t);
+    for (const l of lines) {
+      const row = document.createElement('div'); row.className = 'tl';
+      const a = document.createElement('span');
+      if (l.color) { const sw = document.createElement('i'); sw.className = 'gb-sw'; sw.style.background = l.color; a.append(sw); }
+      a.append(document.createTextNode(l.label));
+      const b = document.createElement('span'); b.textContent = l.value;
+      row.append(a, b); tip.append(row);
+    }
+    moveTip(event);
+    tip.classList.add('on');
+  }
+  function moveTip(event) {
+    const box = root.getBoundingClientRect();
+    const tw = tip.offsetWidth, th = tip.offsetHeight;
+    let x = event.clientX - box.left + 14;
+    let y = event.clientY - box.top + 14;
+    if (x + tw > box.width) x = event.clientX - box.left - tw - 14;
+    if (x < 0) x = 0;
+    if (y + th > box.height) y = event.clientY - box.top - th - 14;
+    tip.style.left = x + 'px';
+    tip.style.top = y + 'px';
+  }
+  const hideTip = () => tip.classList.remove('on');
+
+  function failOrWait(els) {
+    const st = ['bonds', 'fx', 'bonds_eur'].map((id) => dash.data(id).status);
+    const failed = st.some((s) => s === 'error' || s === 'missing' || s === 'declined');
+    for (const el of els) {
+      el.replaceChildren();
+      el.classList.toggle('dash-skeleton', !failed);
+      if (failed) { const f = document.createElement('div'); f.className = 'gb-fail'; f.textContent = 'Failed to load'; el.append(f); }
+    }
+  }
+
+  // ---------- controls ----------
+  function chip(text, pressed, onClick, color) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'gb-chip';
+    b.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+    if (color) { const s = document.createElement('i'); s.className = 'gb-sw'; s.style.background = color; b.append(s); }
+    b.append(document.createTextNode(text));
+    b.addEventListener('click', onClick);
+    return b;
+  }
+
+  function drawControls(all, p) {
+    $('#f-status').replaceChildren(
+      ...[['live', 'Live'], ['matured', 'Matured'], ['all', 'All']].map(([v, l]) => chip(l, p.status === v, () => dash.setParams({ status: v })))
+    );
+    $('#f-color').replaceChildren(
+      ...Object.entries(DIMS).map(([k, d]) => chip(d.label, p.colorby === k, () => dash.setParams({ colorby: k })))
+    );
+    const fill = (sel, dim) => {
+      const s = scaleFor(all, dim);
+      $(sel).replaceChildren(...s.domain.map((v) => chip(v, p[DIMS[dim].param] === v, () => toggle(DIMS[dim].param, v), s.color(v))));
+    };
+    fill('#f-issuer', 'issuer');
+    fill('#f-ccy', 'currency');
+    fill('#f-esg', 'esg');
+    $('#f-mix').value = p.mixby;
+
+    const act = [];
+    for (const [k, d] of Object.entries(DIMS)) if (p[d.param]) act.push([d.label + ': ' + p[d.param], { [d.param]: null }]);
+    if (p.year) act.push(['Maturity year: ' + p.year, { year: null }]);
+    if (p.isin) act.push(['Inspecting: ' + p.isin, { isin: null }]);
+    $('#f-active').replaceChildren(...act.map(([t, clear]) => {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'gb-pill'; b.textContent = t + '  ×';
+      b.addEventListener('click', () => dash.setParams(clear)); return b;
+    }));
+  }
+
+  $('#f-mix').addEventListener('change', (e) => dash.setParams({ mixby: e.target.value }));
+  $('#f-q').addEventListener('input', (e) => { q = e.target.value.trim().toLowerCase(); draw(); });
+  $('#f-reset').addEventListener('click', () => { q = ''; $('#f-q').value = ''; dash.resetParams(); });
+
+  // ---------- KPIs + takeaway ----------
+  function drawKpis(rows, all, p) {
+    const tot = d3.sum(rows, (r) => r.eur);
+    const set = (id, v, s) => { const e = $('#' + id); e.classList.remove('dash-skeleton'); e.textContent = v; if (s != null) $('#' + id + 's').textContent = s; };
+    const wavg = (arr, f) => { const w = d3.sum(arr, (r) => r.eur); return w ? d3.sum(arr, (r) => r.eur * f(r)) / w : null; };
+    const ccys = new Set(rows.map((r) => r.currency)).size;
+    set('k1', fmtEUR(tot), `${rows.length} bond${rows.length === 1 ? '' : 's'} · ${ccys} currenc${ccys === 1 ? 'y' : 'ies'}`);
+    const cp = wavg(rows, (r) => r.coupon);
+    const ext = d3.extent(rows, (r) => r.coupon);
+    set('k2', fmtPct2(cp), rows.length ? `Range ${fmtCpn(ext[0])} – ${fmtCpn(ext[1])}` : '');
+    const dated = rows.filter((r) => r.left != null && r.status !== 'Matured');
+    set('k3', fmtYrs(wavg(dated, (r) => r.left)), rows.some((r) => r.status === 'Perpetual') ? 'Excludes the perpetual AT1' : 'Remaining life, nominal-weighted');
+    const cost = d3.sum(rows.filter((r) => r.status !== 'Matured'), (r) => r.cost);
+    set('k4', fmtEUR(cost), cost ? `≈ ${fmtEUR(cost / 12)} a month` : '');
+    const esgAmt = d3.sum(rows.filter((r) => r.esg !== 'Conventional'), (r) => r.eur);
+    const g = d3.sum(rows.filter((r) => r.esg === 'Green'), (r) => r.eur);
+    const s = d3.sum(rows.filter((r) => r.esg === 'Social'), (r) => r.eur);
+    set('k5', tot ? d3.format('.1%')(esgAmt / tot) : '—', `Green ${fmtEUR(g)} · Social ${fmtEUR(s)}`);
+    const now = Date.now();
+    const next = rows.filter((r) => r.maturity && +r.maturity >= now).sort((a, b) => a.maturity - b.maturity)[0];
+    if (next) {
+      const days = Math.ceil((next.maturity - now) / DAY);
+      set('k6', `${fmtInt(days)} days`, `${fmtDate(next.maturity)} · ${fmtLocal(next.currency, next.amount)} ${fmtCpn(next.coupon)}`);
+    } else set('k6', '—', 'Nothing due in this selection');
+    document.querySelectorAll('.gb-kpi').forEach((k, i) => k.style.setProperty('--gb-accent', i === 0 ? dash.colors[0] : 'transparent'));
+
+    // takeaway (uses live book for the headline, independent of year filter)
+    const take = $('#gb-take');
+    take.classList.remove('dash-skeleton');
+    take.replaceChildren();
+    if (!rows.length) { take.textContent = 'No bonds match these filters.'; return; }
+    const byYear = d3.rollups(rows.filter((r) => r.maturity), (v) => d3.sum(v, (r) => r.eur), (r) => r.year).sort((a, b) => b[1] - a[1]);
+    const b = (t) => { const e = document.createElement('b'); e.textContent = t; return e; };
+    const txt = (t) => document.createTextNode(t);
+    take.append(b(fmtEUR(tot)), txt(` across ${rows.length} bonds in ${ccys} currencies, at a weighted coupon of `), b(fmtPct2(cp)), txt('.'));
+    if (byYear.length) {
+      take.append(txt(' The heaviest maturity year is '), b(byYear[0][0]), txt(` (${fmtEUR(byYear[0][1])}, ${d3.format('.0%')(byYear[0][1] / tot)} of this selection)`));
+      if (next) take.append(txt(', and the next redemption is due in '), b(`${fmtInt(Math.ceil((next.maturity - now) / DAY))} days`), txt('.'));
+      else take.append(txt('.'));
+    }
+  }
+
+  // ---------- maturity wall ----------
+  function drawWall(el, rows, all, p, cs) {
+    el.replaceChildren(); el.classList.remove('dash-skeleton');
+    const w = Math.max(320, el.clientWidth), h = 280;
+    const nums = rows.filter((r) => r.maturity).map((r) => +r.year);
+    if (!rows.length) { const f = document.createElement('div'); f.className = 'gb-fail'; f.textContent = 'No bonds in this selection'; el.append(f); return; }
+    let years = [];
+    if (nums.length) for (let y = d3.min(nums); y <= d3.max(nums); y++) years.push(String(y));
+    if (rows.some((r) => !r.maturity)) years.push('Perp.');
+    const keys = cs.domain;
+    const table = years.map((y) => {
+      const o = { year: y };
+      keys.forEach((k) => (o[k] = 0));
+      rows.filter((r) => r.year === y).forEach((r) => (o[cs.dim.key(r)] += r.eur));
+      o.total = d3.sum(keys, (k) => o[k]);
+      o.n = rows.filter((r) => r.year === y).length;
+      return o;
+    });
+    const svg = svgIn(el, w, h);
+    const ymax = d3.max(table, (d) => d.total) || 1;
+    const y = d3.scaleLinear([0, ymax * 1.12], [h - 26, 18]).nice();
+    const ticks = y.ticks(4);
+    const ml = measure(svg, ticks.map(fmtAxisEUR)) + 10;
+    const m = { l: ml, r: 4, t: 18, b: 26 };
+    const x = d3.scaleBand(years, [m.l, w - m.r]).padding(0.3);
+    svg.append('g').selectAll('line').data(ticks).join('line').attr('class', 'grid-l').attr('x1', m.l).attr('x2', w - m.r).attr('y1', (d) => y(d)).attr('y2', (d) => y(d));
+    svg.append('g').selectAll('text').data(ticks).join('text').attr('class', 'tick-l').attr('x', m.l - 8).attr('y', (d) => y(d)).attr('dy', '0.32em').attr('text-anchor', 'end').text(fmtAxisEUR);
+    const series = d3.stack().keys(keys)(table);
+    const bw = Math.min(56, x.bandwidth());
+    const off = (x.bandwidth() - bw) / 2;
+    const dim = (d) => (p.year && d !== p.year ? 0.28 : 1);
+    const g = svg.append('g');
+    series.forEach((s) => {
+      g.append('g').attr('fill', cs.color(s.key)).selectAll('rect').data(s.filter((d) => d[1] - d[0] > 0)).join('rect')
+        .attr('x', (d) => x(d.data.year) + off).attr('width', bw)
+        .attr('y', (d) => y(d[1])).attr('height', (d) => Math.max(0, y(d[0]) - y(d[1]) - 1.5))
+        .attr('rx', 3).attr('opacity', (d) => dim(d.data.year));
+    });
+    svg.append('g').selectAll('text').data(table.filter((d) => d.total > 0)).join('text').attr('class', 'val-l')
+      .attr('x', (d) => x(d.year) + x.bandwidth() / 2).attr('y', (d) => y(d.total) - 6).attr('text-anchor', 'middle')
+      .attr('opacity', (d) => dim(d.year)).text((d) => fmtAxisEUR(Math.round(d.total)));
+    svg.append('line').attr('class', 'axis-l').attr('x1', m.l).attr('x2', w - m.r).attr('y1', y(0)).attr('y2', y(0));
+    const step = Math.ceil(years.length / Math.max(1, Math.floor((w - m.l) / 44)));
+    svg.append('g').selectAll('text').data(years.filter((_, i) => i % step === 0)).join('text').attr('class', 'tick-l')
+      .attr('x', (d) => x(d) + x.bandwidth() / 2).attr('y', h - 8).attr('text-anchor', 'middle')
+      .attr('font-weight', (d) => (d === p.year ? 600 : null)).text((d) => d);
+    svg.append('g').selectAll('rect').data(table).join('rect').attr('class', 'hit')
+      .attr('x', (d) => x(d.year)).attr('width', x.bandwidth()).attr('y', m.t).attr('height', h - m.t - m.b).attr('fill', 'transparent')
+      .on('mousemove', (event, d) => setTip(event, `${d.year === 'Perp.' ? 'Perpetual' : 'Maturing in ' + d.year} · ${d.n} bond${d.n === 1 ? '' : 's'}`, [
+        ...keys.filter((k) => d[k] > 0).map((k) => ({ color: cs.color(k), label: k, value: fmtEUR(d[k]) })),
+        { label: 'Total', value: fmtEUR(d.total) },
+      ]))
+      .on('mouseleave', hideTip)
+      .on('click', (event, d) => { if (d.total > 0) toggle('year', d.year); });
+  }
+
+  // ---------- donut ----------
+  function drawMix(el, legend, rows, all, p) {
+    el.replaceChildren(); legend.replaceChildren(); el.classList.remove('dash-skeleton'); legend.classList.remove('dash-skeleton');
+    const dimName = p.mixby in DIMS ? p.mixby : 'currency';
+    const cs = scaleFor(all, dimName);
+    const d = DIMS[dimName];
+    const data = d3.rollups(rows, (v) => ({ eur: d3.sum(v, (r) => r.eur), n: v.length }), d.key).sort((a, b) => b[1].eur - a[1].eur);
+    const total = d3.sum(data, (x) => x[1].eur);
+    const size = 220, r = size / 2;
+    const svg = svgIn(el, size, size);
+    const g = svg.append('g').attr('transform', `translate(${r},${r})`);
+    const pie = d3.pie().value((x) => x[1].eur).sort(null).padAngle(0.014);
+    const arc = d3.arc().innerRadius(r * 0.64).outerRadius(r - 6).cornerRadius(4);
+    const arcOn = d3.arc().innerRadius(r * 0.64).outerRadius(r).cornerRadius(4);
+    const sel = p[d.param];
+    g.selectAll('path').data(pie(data)).join('path').attr('class', 'hit')
+      .attr('d', (a) => (sel === a.data[0] ? arcOn(a) : arc(a)))
+      .attr('fill', (a) => cs.color(a.data[0]))
+      .attr('opacity', (a) => (sel && sel !== a.data[0] ? 0.3 : 1))
+      .on('mousemove', function (event, a) { d3.select(this).attr('d', arcOn(a)); setTip(event, d.label, [{ color: cs.color(a.data[0]), label: a.data[0], value: `${fmtEUR(a.data[1].eur)} · ${d3.format('.1%')(a.data[1].eur / total)}` }]); })
+      .on('mouseleave', function (event, a) { if (sel !== a.data[0]) d3.select(this).attr('d', arc(a)); hideTip(); })
+      .on('click', (event, a) => toggle(d.param, a.data[0]));
+    g.append('text').attr('text-anchor', 'middle').attr('dy', '-0.1em').attr('fill', 'var(--color-fg)')
+      .style('font-family', 'var(--font-anthropic-serif)').style('font-size', '22px').text(fmtEUR(total));
+    g.append('text').attr('text-anchor', 'middle').attr('dy', '1.4em').attr('class', 'tick-l').text(`${rows.length} bonds`);
+    for (const [k, v] of data) {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'gb-lrow';
+      b.setAttribute('aria-pressed', sel === k ? 'true' : 'false');
+      const sw = document.createElement('i'); sw.className = 'gb-sw'; sw.style.background = cs.color(k);
+      const n = document.createElement('span'); n.textContent = k;
+      const a = document.createElement('span'); a.textContent = fmtEUR(v.eur);
+      const pc = document.createElement('span'); pc.className = 'muted'; pc.textContent = d3.format('.1%')(v.eur / total);
+      b.append(sw, n, a, pc);
+      b.addEventListener('click', () => toggle(d.param, k));
+      legend.append(b);
+    }
+  }
+
+  // ---------- bubble ----------
+  function drawBubble(el, rows, all, p, cs) {
+    el.replaceChildren(); el.classList.remove('dash-skeleton');
+    const w = Math.max(320, el.clientWidth), h = 320;
+    const pts = rows.filter((r) => r.maturity);
+    const svg = svgIn(el, w, h);
+    const now = new Date();
+    const allDated = all.filter((r) => r.maturity);
+    const ymax = d3.max(all, (r) => r.coupon) * 1.15;
+    const y = d3.scaleLinear([0, ymax], [h - 28, 14]).nice();
+    const yt = y.ticks(5);
+    const ml = measure(svg, yt.map((t) => t + '%')) + 10;
+    const m = { l: ml, r: 24, t: 14, b: 28 };
+    const x0 = d3.min([now, ...allDated.map((r) => r.maturity)]);
+    const x1 = d3.utcMonth.offset(d3.max(allDated, (r) => r.maturity), 4);
+    const x = d3.scaleUtc([d3.utcMonth.offset(x0, -3), x1], [m.l, w - m.r]);
+    const rs = d3.scaleSqrt([0, d3.max(all, (r) => r.eur)], [3, Math.min(30, w / 28)]);
+    svg.append('g').selectAll('line').data(yt).join('line').attr('class', 'grid-l').attr('x1', m.l).attr('x2', w - m.r).attr('y1', (d) => y(d)).attr('y2', (d) => y(d));
+    svg.append('g').selectAll('text').data(yt).join('text').attr('class', 'tick-l').attr('x', m.l - 8).attr('y', (d) => y(d)).attr('dy', '0.32em').attr('text-anchor', 'end').text((d) => d + '%');
+    const xt = x.ticks(Math.max(2, Math.floor((w - m.l) / 80)));
+    svg.append('g').selectAll('text').data(xt).join('text').attr('class', 'tick-l').attr('x', (d) => x(d)).attr('y', h - 8).attr('text-anchor', 'middle').text(d3.utcFormat('%Y'));
+    svg.append('line').attr('class', 'axis-l').attr('x1', m.l).attr('x2', w - m.r).attr('y1', y(0)).attr('y2', y(0));
+    if (x(now) > m.l) {
+      svg.append('line').attr('class', 'ref-l').attr('x1', x(now)).attr('x2', x(now)).attr('y1', m.t).attr('y2', y(0));
+      svg.append('text').attr('class', 'tick-l').attr('x', x(now) + 4).attr('y', m.t + 8).text('Today');
+    }
+    const wsum = d3.sum(rows, (r) => r.eur);
+    if (wsum) {
+      const wc = d3.sum(rows, (r) => r.eur * r.coupon) / wsum;
+      svg.append('line').attr('class', 'ref-l').attr('x1', m.l).attr('x2', w - m.r).attr('y1', y(wc)).attr('y2', y(wc));
+      svg.append('text').attr('class', 'tick-l').attr('x', w - m.r).attr('y', y(wc) - 5).attr('text-anchor', 'end').text(`Weighted avg ${fmtPct2(wc)}`);
+    }
+    const sorted = [...pts].sort((a, b) => b.eur - a.eur);
+    svg.append('g').selectAll('circle').data(sorted, (d) => d.isin).join('circle').attr('class', 'hit')
+      .attr('cx', (d) => x(d.maturity)).attr('cy', (d) => y(d.coupon)).attr('r', (d) => rs(d.eur))
+      .attr('fill', (d) => cs.color(cs.dim.key(d))).attr('fill-opacity', (d) => (p.isin && p.isin !== d.isin ? 0.25 : 0.72))
+      .attr('stroke', (d) => (p.isin === d.isin ? 'var(--color-fg)' : cs.color(cs.dim.key(d))))
+      .attr('stroke-width', (d) => (p.isin === d.isin ? 2.5 : 1))
+      .on('mousemove', (event, d) => setTip(event, `${d.issuer_short} · ${d.isin}`, [
+        { color: cs.color(cs.dim.key(d)), label: cs.dim.label, value: cs.dim.key(d) },
+        { label: 'Coupon', value: fmtCpn(d.coupon) },
+        { label: 'Nominal', value: `${fmtLocal(d.currency, d.amount)} (${fmtEUR(d.eur)})` },
+        { label: 'Maturity', value: fmtDate(d.maturity) },
+      ]))
+      .on('mouseleave', hideTip)
+      .on('click', (event, d) => toggle('isin', d.isin));
+    // label coupons on large bubbles
+    svg.append('g').selectAll('text').data(sorted.filter((d) => rs(d.eur) >= 16)).join('text')
+      .attr('x', (d) => x(d.maturity)).attr('y', (d) => y(d.coupon)).attr('dy', '0.32em').attr('text-anchor', 'middle')
+      .attr('pointer-events', 'none').attr('fill', 'var(--color-fg)').style('font-size', '10px').text((d) => fmtCpn(d.coupon));
+    const perp = rows.filter((r) => !r.maturity);
+    if (perp.length) svg.append('text').attr('class', 'tick-l').attr('x', w - m.r).attr('y', m.t + 8).attr('text-anchor', 'end').text(`Not plotted: ${perp.length} perpetual (${perp.map((r) => fmtCpn(r.coupon)).join(', ')})`);
+  }
+
+  // ---------- detail ----------
+  function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function drawDetail(box, rows, all, p, cs) {
+    box.replaceChildren(); box.classList.remove('dash-skeleton');
+    const now = Date.now();
+    const order = [...rows].sort((a, b) => (a.maturity ? +a.maturity : Infinity) - (b.maturity ? +b.maturity : Infinity));
+    let bnd = p.isin ? all.find((r) => r.isin === p.isin) : null;
+    $('#d-hint').textContent = bnd ? 'Selected bond' : 'Next maturing bond in this selection · pick another anywhere';
+    if (!bnd) bnd = order.find((r) => r.maturity && +r.maturity >= now) || order[0];
+    if (!bnd) { box.append(el('div', 'gb-fail', 'No bond in this selection')); return; }
+    const color = cs.color(cs.dim.key(bnd));
+    const top = el('div', 'gb-dtop');
+    const who = el('div');
+    who.append(el('div', 'gb-dissuer', `${bnd.issuer} · ${bnd.country}`), el('div', 'gb-isin', bnd.isin));
+    const badges = el('div', 'gb-badges');
+    badges.append(el('span', 'gb-badge', bnd.instrument));
+    if (bnd.esg !== 'Conventional') badges.append(el('span', 'gb-badge ok', bnd.esg + ' bond'));
+    badges.append(el('span', 'gb-badge ' + (bnd.status === 'Matured' ? 'bad' : bnd.status === 'Perpetual' ? 'warn' : 'ok'), bnd.status));
+    top.append(who, badges);
+    const big = el('div', 'gb-dbig');
+    const c = el('div', 'gb-dcpn', fmtCpn(bnd.coupon)); c.style.color = color;
+    big.append(c, el('div', 'gb-damt', fmtLocal(bnd.currency, bnd.amount)));
+    const life = el('div', 'gb-life');
+    const track = el('div', 'gb-track'); const fill = el('div', 'gb-fill'); fill.style.background = color;
+    let pct = 1, lbl;
+    if (bnd.maturity) {
+      pct = Math.min(1, Math.max(0, (now - bnd.issue) / (bnd.maturity - bnd.issue)));
+      lbl = bnd.status === 'Matured' ? 'Redeemed' : `${d3.format('.0%')(pct)} of term elapsed · ${fmtYrs(bnd.left)} left`;
+    } else { pct = 1; lbl = 'Perpetual, no final maturity'; fill.style.opacity = 0.5; }
+    fill.style.width = pct * 100 + '%';
+    track.append(fill);
+    const ll = el('div', 'gb-lifel'); ll.append(el('span', null, fmtDate(bnd.issue)), el('span', null, lbl), el('span', null, fmtDate(bnd.maturity)));
+    life.append(track, ll);
+    const facts = el('dl', 'gb-facts');
+    const fact = (k, v) => { const f = el('div', 'gb-fact'); f.append(el('dt', null, k), el('dd', null, v)); facts.append(f); };
+    fact('EUR equivalent', fmtEUR(bnd.eur));
+    fact('Coupon per year', fmtEUR(bnd.cost));
+    fact('Original tenor', bnd.tenor == null ? 'Perpetual' : fmtYrs(bnd.tenor));
+    fact('Share of selection', d3.format('.1%')(bnd.eur / (d3.sum(rows, (r) => r.eur) || bnd.eur)));
+    fact('Programme', bnd.programme);
+    fact('Currency', bnd.currency);
+    const nav = el('div', 'gb-dnav');
+    const idx = order.findIndex((r) => r.isin === bnd.isin);
+    const prev = el('button', 'gb-btn', '← Previous'); prev.type = 'button';
+    const next = el('button', 'gb-btn', 'Next →'); next.type = 'button';
+    prev.disabled = idx <= 0; next.disabled = idx < 0 || idx >= order.length - 1;
+    prev.addEventListener('click', () => order[idx - 1] && dash.setParams({ isin: order[idx - 1].isin }));
+    next.addEventListener('click', () => order[idx + 1] && dash.setParams({ isin: order[idx + 1].isin }));
+    nav.append(prev, next, el('span', null, idx >= 0 ? `${idx + 1} of ${order.length} by maturity` : 'Outside current filters'));
+    box.append(top, big, life, facts, nav);
+  }
+
+  // ---------- gantt ----------
+  function drawGantt(el, rows, all, p, cs) {
+    el.replaceChildren(); el.classList.remove('dash-skeleton');
+    const order = [...rows].sort((a, b) => (a.maturity ? +a.maturity : Infinity) - (b.maturity ? +b.maturity : Infinity));
+    const w = Math.max(320, el.clientWidth), rowH = 26;
+    const h = 30 + order.length * rowH + 26;
+    el.style.minHeight = h + 'px';
+    if (!order.length) return;
+    const svg = svgIn(el, w, h);
+    const longLab = (r) => `${fmtLocal(r.currency, r.amount)} · ${fmtCpn(r.coupon)} · ${r.maturity ? d3.utcFormat('%b %Y')(r.maturity) : 'Perp.'}`;
+    const shortLab = (r) => `${r.currency} ${d3.format(',.2~f')(r.amount)} · ${r.maturity ? "'" + String(r.maturity.getUTCFullYear()).slice(2) : 'Perp.'}`;
+    const fits = measure(svg, order.map(longLab)) + 14 <= w * 0.45;
+    const lab = fits ? longLab : shortLab;
+    const ml = Math.min(w * 0.45, measure(svg, order.map(lab)) + 14);
+    const m = { l: ml, r: 12, t: 30, b: 26 };
+    const now = new Date();
+    const x0 = d3.utcYear.floor(d3.min(all, (r) => r.issue));
+    const x1 = d3.utcYear.ceil(d3.utcMonth.offset(d3.max(all, (r) => r.maturity || r.issue), 6));
+    const x = d3.scaleUtc([x0, x1], [m.l, w - m.r]);
+    const yy = (i) => m.t + i * rowH;
+    const xt = x.ticks(Math.max(2, Math.floor((w - m.l) / 60)));
+    svg.append('g').selectAll('line').data(xt).join('line').attr('class', 'grid-l').attr('x1', (d) => x(d)).attr('x2', (d) => x(d)).attr('y1', m.t - 6).attr('y2', h - m.b);
+    svg.append('g').selectAll('text').data(xt).join('text').attr('class', 'tick-l').attr('x', (d) => x(d)).attr('y', h - 8).attr('text-anchor', 'middle').text(d3.utcFormat('%Y'));
+    const g = svg.append('g').selectAll('g').data(order, (d) => d.isin).join('g').attr('class', 'hit')
+      .attr('opacity', (d) => (p.isin && p.isin !== d.isin ? 0.35 : 1))
+      .on('mousemove', (event, d) => setTip(event, `${d.issuer_short} · ${d.isin}`, [
+        { color: cs.color(cs.dim.key(d)), label: cs.dim.label, value: cs.dim.key(d) },
+        { label: 'Term', value: `${fmtDate(d.issue)} → ${fmtDate(d.maturity)}` },
+        { label: 'Nominal', value: fmtEUR(d.eur) },
+        { label: 'Left', value: d.maturity ? fmtYrs(d.left) : 'Perpetual' },
+      ]))
+      .on('mouseleave', hideTip)
+      .on('click', (event, d) => toggle('isin', d.isin));
+    g.append('rect').attr('x', 0).attr('width', w).attr('y', (d, i) => yy(i)).attr('height', rowH)
+      .attr('fill', (d) => (p.isin === d.isin ? 'var(--color-bg)' : 'transparent'));
+    g.append('text').attr('class', 'tick-l').attr('x', m.l - 10).attr('y', (d, i) => yy(i) + rowH / 2).attr('dy', '0.32em').attr('text-anchor', 'end')
+      .attr('fill', (d) => (d.status === 'Matured' ? 'var(--color-fg-muted)' : 'var(--color-fg)')).style('fill', (d) => (d.status === 'Matured' ? null : 'var(--color-fg)')).text(lab);
+    const endX = (d) => (d.maturity ? x(d.maturity) : x(x1));
+    g.append('rect').attr('x', (d) => x(d.issue)).attr('y', (d, i) => yy(i) + 7).attr('height', 12).attr('rx', 6)
+      .attr('width', (d) => Math.max(2, endX(d) - x(d.issue))).attr('fill', (d) => cs.color(cs.dim.key(d))).attr('opacity', 0.25);
+    g.append('rect').attr('x', (d) => x(d.issue)).attr('y', (d, i) => yy(i) + 7).attr('height', 12).attr('rx', 6)
+      .attr('width', (d) => Math.max(2, Math.min(endX(d), x(now)) - x(d.issue))).attr('fill', (d) => cs.color(cs.dim.key(d)));
+    g.filter((d) => d.esg !== 'Conventional').append('text').attr('x', (d) => endX(d) - 6).attr('y', (d, i) => yy(i) + 13).attr('dy', '0.32em')
+      .attr('text-anchor', 'end').style('font-size', '9px').attr('fill', 'var(--color-fg)').text((d) => d.esg.toUpperCase());
+    svg.append('line').attr('class', 'ref-l').attr('x1', x(now)).attr('x2', x(now)).attr('y1', m.t - 14).attr('y2', h - m.b);
+    svg.append('text').attr('class', 'tick-l').attr('x', x(now)).attr('y', m.t - 18).attr('text-anchor', 'middle').text('Today');
+  }
+
+  // ---------- vintage ----------
+  function drawVintage(el, rows) {
+    el.replaceChildren(); el.classList.remove('dash-skeleton');
+    const w = Math.max(320, el.clientWidth), h = 260;
+    if (!rows.length) return;
+    const ys = rows.map((r) => +r.issueYear);
+    const years = d3.range(d3.min(ys), d3.max(ys) + 1).map(String);
+    const data = years.map((yr) => {
+      const v = rows.filter((r) => r.issueYear === yr);
+      const e = d3.sum(v, (r) => r.eur);
+      return { yr, eur: e, n: v.length, cpn: e ? d3.sum(v, (r) => r.eur * r.coupon) / e : null };
+    });
+    const svg = svgIn(el, w, h);
+    const y = d3.scaleLinear([0, (d3.max(data, (d) => d.eur) || 1) * 1.1], [h - 26, 14]).nice();
+    const y2 = d3.scaleLinear([0, (d3.max(data, (d) => d.cpn) || 1) * 1.15], [h - 26, 14]).nice();
+    const yt = y.ticks(4), y2t = y2.ticks(4);
+    const ml = measure(svg, yt.map(fmtAxisEUR)) + 10;
+    const mr = measure(svg, y2t.map((t) => t + '%')) + 10;
+    const m = { l: ml, r: mr, t: 14, b: 26 };
+    const x = d3.scaleBand(years, [m.l, w - m.r]).padding(0.3);
+    svg.append('g').selectAll('line').data(yt).join('line').attr('class', 'grid-l').attr('x1', m.l).attr('x2', w - m.r).attr('y1', (d) => y(d)).attr('y2', (d) => y(d));
+    svg.append('g').selectAll('text').data(yt).join('text').attr('class', 'tick-l').attr('x', m.l - 8).attr('y', (d) => y(d)).attr('dy', '0.32em').attr('text-anchor', 'end').text(fmtAxisEUR);
+    svg.append('g').selectAll('text').data(y2t).join('text').attr('class', 'tick-l').attr('x', w - m.r + 8).attr('y', (d) => y2(d)).attr('dy', '0.32em').text((d) => d + '%');
+    const bw = Math.min(32, x.bandwidth()), off = (x.bandwidth() - bw) / 2;
+    svg.append('g').selectAll('rect').data(data).join('rect').attr('x', (d) => x(d.yr) + off).attr('width', bw)
+      .attr('y', (d) => y(d.eur)).attr('height', (d) => y(0) - y(d.eur)).attr('rx', 4).attr('fill', dash.colors[0]).attr('opacity', 0.85);
+    const line = d3.line().defined((d) => d.cpn != null).x((d) => x(d.yr) + x.bandwidth() / 2).y((d) => y2(d.cpn));
+    svg.append('path').datum(data).attr('d', line).attr('fill', 'none').attr('stroke', dash.colors[1]).attr('stroke-width', 2).attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
+    svg.append('g').selectAll('circle').data(data.filter((d) => d.cpn != null)).join('circle')
+      .attr('cx', (d) => x(d.yr) + x.bandwidth() / 2).attr('cy', (d) => y2(d.cpn)).attr('r', 4).attr('fill', 'var(--color-panel)').attr('stroke', dash.colors[1]).attr('stroke-width', 2);
+    svg.append('line').attr('class', 'axis-l').attr('x1', m.l).attr('x2', w - m.r).attr('y1', y(0)).attr('y2', y(0));
+    svg.append('g').selectAll('text').data(years).join('text').attr('class', 'tick-l').attr('x', (d) => x(d) + x.bandwidth() / 2).attr('y', h - 8).attr('text-anchor', 'middle').text((d) => "'" + d.slice(2));
+    svg.append('g').selectAll('rect').data(data).join('rect').attr('class', 'hit').attr('x', (d) => x(d.yr)).attr('width', x.bandwidth()).attr('y', m.t).attr('height', h - m.t - m.b).attr('fill', 'transparent')
+      .on('mousemove', (event, d) => setTip(event, `Issued in ${d.yr}`, [
+        { color: dash.colors[0], label: 'Nominal', value: d.eur ? fmtEUR(d.eur) : '—' },
+        { color: dash.colors[1], label: 'Weighted coupon', value: d.cpn == null ? '—' : fmtPct2(d.cpn) },
+        { label: 'Bonds', value: String(d.n) },
+      ]))
+      .on('mouseleave', hideTip);
+  }
+
+  // ---------- coupon cost ----------
+  function drawCost(el, rows, cs) {
+    el.replaceChildren(); el.classList.remove('dash-skeleton');
+    $('#cost-note').textContent = `EUR per year on bonds not yet redeemed, by ${cs.dim.label.toLowerCase()}`;
+    const live = rows.filter((r) => r.status !== 'Matured');
+    const data = d3.rollups(live, (v) => ({ cost: d3.sum(v, (r) => r.cost), eur: d3.sum(v, (r) => r.eur) }), cs.dim.key).sort((a, b) => b[1].cost - a[1].cost);
+    if (!data.length) return;
+    const w = Math.max(320, el.clientWidth), rowH = 34, h = data.length * rowH + 8;
+    el.style.minHeight = h + 'px';
+    const svg = svgIn(el, w, h);
+    const ml = Math.min(w * 0.4, measure(svg, data.map((d) => d[0])) + 12);
+    const vl = measure(svg, data.map((d) => fmtEUR(d[1].cost))) + 10;
+    const x = d3.scaleLinear([0, d3.max(data, (d) => d[1].cost) || 1], [ml, w - vl]);
+    const g = svg.selectAll('g').data(data).join('g').attr('transform', (d, i) => `translate(0,${i * rowH + 4})`)
+      .on('mousemove', (event, d) => setTip(event, d[0], [
+        { color: cs.color(d[0]), label: 'Coupon per year', value: fmtEUR(d[1].cost) },
+        { label: 'Nominal', value: fmtEUR(d[1].eur) },
+        { label: 'Implied avg coupon', value: fmtPct2((d[1].cost / d[1].eur) * 100) },
+      ]))
+      .on('mouseleave', hideTip);
+    g.append('text').attr('class', 'tick-l').attr('x', ml - 10).attr('y', rowH / 2 - 4).attr('dy', '0.32em').attr('text-anchor', 'end').text((d) => d[0]);
+    g.append('rect').attr('x', ml).attr('y', rowH / 2 - 14).attr('height', 20).attr('rx', 4).attr('fill', (d) => cs.color(d[0]))
+      .attr('width', (d) => Math.max(2, x(d[1].cost) - ml));
+    g.append('text').attr('class', 'val-l').attr('x', (d) => x(d[1].cost) + 6).attr('y', rowH / 2 - 4).attr('dy', '0.32em').text((d) => fmtEUR(d[1].cost));
+  }
+
+  // ---------- table ----------
+  const SORTERS = {
+    isin: (r) => r.isin, issuer_short: (r) => r.issuer_short, currency: (r) => r.currency, amount: (r) => r.amount, eur: (r) => r.eur,
+    coupon: (r) => r.coupon, issue: (r) => +r.issue, maturity: (r) => (r.maturity ? +r.maturity : Infinity), left: (r) => (r.left == null ? Infinity : r.left),
+    cost: (r) => r.cost, esg: (r) => r.esg, status: (r) => r.status,
+  };
+  document.querySelectorAll('#t-bonds th').forEach((th) => {
+    th.querySelector('button').addEventListener('click', () => {
+      const k = th.dataset.k;
+      if (sort.key === k) sort.dir = -sort.dir; else { sort.key = k; sort.dir = 1; }
+      draw();
+    });
+  });
+  $('#t-body').addEventListener('click', (e) => { const tr = e.target.closest('tr[data-key]'); if (tr) toggle('isin', tr.dataset.key); });
+  let lastRows = [];
+  $('#t-csv').addEventListener('click', async () => {
+    const head = ['isin', 'issuer', 'currency', 'amount_m', 'eur_eq_m', 'coupon_pct', 'issue_date', 'maturity_date', 'years_left', 'coupon_per_year_eur_m', 'esg', 'status'];
+    const iso = d3.utcFormat('%Y-%m-%d');
+    const lines = [head.join(',')].concat(lastRows.map((r) => [r.isin, '"' + r.issuer + '"', r.currency, r.amount, r.eur, r.coupon, iso(r.issue), r.maturity ? iso(r.maturity) : '', r.left ?? '', r.cost, r.esg, r.status].join(',')));
+    try { await navigator.clipboard.writeText(lines.join('\n')); $('#t-csv').textContent = 'Copied ✓'; } catch (err) { $('#t-csv').textContent = 'Copy blocked'; }
+    setTimeout(() => ($('#t-csv').textContent = 'Copy as CSV'), 1600);
+  });
+
+  function drawTable(rows, p, cs) {
+    const body = $('#t-body');
+    const f = SORTERS[sort.key] || SORTERS.maturity;
+    const data = [...rows].sort((a, b) => { const x = f(a), y = f(b); return (x < y ? -1 : x > y ? 1 : 0) * sort.dir; });
+    lastRows = data;
+    document.querySelectorAll('#t-bonds th').forEach((th) => th.setAttribute('aria-sort', th.dataset.k === sort.key ? (sort.dir > 0 ? 'ascending' : 'descending') : 'none'));
+    const max = d3.max(rows, (r) => r.eur) || 1;
+    body.replaceChildren(...data.map((r) => {
+      const tr = document.createElement('tr');
+      tr.dataset.key = r.isin;
+      if (r.isin === p.isin) tr.className = 'sel';
+      else if (r.status === 'Matured') tr.className = 'matured';
+      const td = (t, cls) => { const c = document.createElement('td'); if (cls) c.className = cls; c.textContent = t; tr.append(c); return c; };
+      td(r.isin, 'mono');
+      td(r.issuer_short);
+      td(r.currency);
+      td(d3.format(',.2~f')(r.amount), 'num hide-narrow');
+      const ce = document.createElement('td'); ce.className = 'num';
+      const wrap = document.createElement('div'); wrap.className = 'gb-cellbar';
+      const bar = document.createElement('i'); bar.style.width = Math.max(2, (r.eur / max) * 70) + 'px'; bar.style.setProperty('--gb-bar', cs.color(cs.dim.key(r)));
+      const v = document.createElement('span'); v.textContent = d3.format(',.1f')(r.eur);
+      wrap.append(bar, v); ce.append(wrap); tr.append(ce);
+      td(fmtCpn(r.coupon), 'num');
+      td(fmtDate(r.issue), 'hide-narrow');
+      td(fmtDate(r.maturity));
+      td(r.left == null ? '—' : d3.format('.1f')(r.left), 'num');
+      td(d3.format(',.2f')(r.cost), 'num hide-narrow');
+      td(r.esg === 'Conventional' ? '—' : r.esg);
+      td(r.status);
+      return tr;
+    }));
+    $('#t-note').textContent = `${data.length} of ${rows.length === 0 ? 0 : rows.length} bonds shown · sort by any column · click a row to inspect`;
+  }
+
+  // ---------- main draw ----------
+  const chartEls = ['#c-wall', '#c-donut', '#c-legend', '#c-bubble', '#c-detail', '#c-gantt', '#c-vintage', '#c-cost'].map((s) => $(s));
+  function draw() {
+    const all = merged();
+    const p = P();
+    if (!all) { failOrWait(chartEls); return; }
+    const rows = filtered(all, p);
+    const cs = scaleFor(all, p.colorby in DIMS ? p.colorby : 'currency');
+    drawControls(all, p);
+    drawKpis(rows, all, p);
+    drawWall($('#c-wall'), filtered(all, p, 'year'), all, p, cs);
+    drawMix($('#c-donut'), $('#c-legend'), filtered(all, p, DIMS[p.mixby in DIMS ? p.mixby : 'currency'].param), all, p);
+    drawBubble($('#c-bubble'), rows, all, p, cs);
+    drawDetail($('#c-detail'), rows, all, p, cs);
+    drawGantt($('#c-gantt'), rows, all, p, cs);
+    drawVintage($('#c-vintage'), rows);
+    drawCost($('#c-cost'), rows, cs);
+    drawTable(rows, p, cs);
+    if (!animated) { animated = true; root.classList.add('gb-in'); }
+    if (!linked) {
+      linked = true;
+      const named = location.hash ? document.getElementById(location.hash.slice(1)) : null;
+      if (named && root.contains(named)) { named.scrollIntoView(); dash.setLink(named.id); }
+    }
+  }
+  dash.onData(draw);
+})();
+</script>
+
+</div>
+</body>
+</html>
