@@ -3,9 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#06090e">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem("gb-theme")||"dark"}catch(e){document.documentElement.dataset.theme="dark"}</script>
 <title>grenke Issued Bonds</title>
 <meta name="description" content="Interactive dashboard of the bonds issued by the grenke group: maturities, coupons, currencies and ESG labels.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231f3a5f'/%3E%3Crect x='7' y='16' width='4' height='9' rx='1.5' fill='white'/%3E%3Crect x='14' y='10' width='4' height='15' rx='1.5' fill='white'/%3E%3Crect x='21' y='6' width='4' height='19' rx='1.5' fill='white'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2306090e'/%3E%3Crect x='7' y='16' width='4' height='9' rx='1.5' fill='white'/%3E%3Crect x='14' y='10' width='4' height='15' rx='1.5' fill='white'/%3E%3Crect x='21' y='6' width='4' height='19' rx='1.5' fill='white'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
@@ -29,25 +31,29 @@
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     color-scheme: dark;
-    --color-bg:#0d1015; --color-panel:#141921; --color-fg:#e7e9ec; --color-fg-muted:#8a93a0; --color-border-line:#242b35;
+    --color-bg:#06090e; --color-panel:#0c1118; --color-fg:#eef1f5; --color-fg-muted:#8792a2; --color-border-line:#1b2330;
     --color-ok:#5cc28c; --color-warn:#e0a54a; --color-bad:#ef7564;
-    --cds-chart-grid:#1c222b; --cds-chart-axis:#3a424e; --cds-chart-reference:#6b7380; --cds-chart-muted:#3a424e;
-    --cds-surface-popover:#1a2029; --cds-border:#2c3440; --cds-shadow-popover:0 10px 30px rgba(0,0,0,.5); --cds-text-secondary:#8a93a0;
+    --cds-chart-grid:#141b25; --cds-chart-axis:#2c3542; --cds-chart-reference:#5d6878; --cds-chart-muted:#2c3542;
+    --cds-surface-popover:#111823; --cds-border:#263041; --cds-shadow-popover:0 10px 30px rgba(0,0,0,.5); --cds-text-secondary:#8a93a0;
   }
 }
 :root[data-theme="dark"]{
   color-scheme: dark;
-  --color-bg:#0d1015; --color-panel:#141921; --color-fg:#e7e9ec; --color-fg-muted:#8a93a0; --color-border-line:#242b35;
+  --site-bg: radial-gradient(1100px 600px at 8% -8%, rgba(110,168,255,.10), transparent 70%), radial-gradient(900px 500px at 100% 0%, rgba(232,183,92,.06), transparent 70%), #06090e;
+  --color-bg:#06090e; --color-panel:#0c1118; --color-fg:#eef1f5; --color-fg-muted:#8792a2; --color-border-line:#1b2330;
   --color-ok:#5cc28c; --color-warn:#e0a54a; --color-bad:#ef7564;
-  --cds-chart-grid:#1c222b; --cds-chart-axis:#3a424e; --cds-chart-reference:#6b7380; --cds-chart-muted:#3a424e;
-  --cds-surface-popover:#1a2029; --cds-border:#2c3440; --cds-shadow-popover:0 10px 30px rgba(0,0,0,.5); --cds-text-secondary:#8a93a0;
+  --cds-chart-grid:#141b25; --cds-chart-axis:#2c3542; --cds-chart-reference:#5d6878; --cds-chart-muted:#2c3542;
+  --cds-surface-popover:#111823; --cds-border:#263041; --cds-shadow-popover:0 10px 30px rgba(0,0,0,.5); --cds-text-secondary:#8a93a0;
 }
-html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:var(--font-anthropic-sans);font-size:var(--cds-font-size-body);-webkit-font-smoothing:antialiased}
+html,body{margin:0;background:var(--site-bg,var(--color-bg));background-attachment:fixed;color:var(--color-fg);font-family:var(--font-anthropic-sans);font-size:var(--cds-font-size-body);-webkit-font-smoothing:antialiased}
 #dash-root{--dash-gutter:clamp(16px,4vw,48px);padding:var(--dash-gutter);max-width:1440px;margin:0 auto;box-sizing:border-box}
 #dash-root *{box-sizing:border-box}
 .site-bar{display:flex;justify-content:flex-end;gap:12px;align-items:center;font-size:11.5px;color:var(--color-fg-muted);margin-bottom:18px;letter-spacing:.01em}
 .site-bar button{font:inherit;padding:4px 10px;border-radius:4px;border:1px solid var(--color-border-line);background:transparent;color:var(--color-fg-muted);cursor:pointer}
 .site-bar button:hover{color:var(--color-fg)}
+#site-updated{display:inline-flex;align-items:center;gap:8px}
+#site-updated:not(:empty)::before{content:"";width:7px;height:7px;border-radius:50%;background:#3ccf8e;box-shadow:0 0 0 0 rgba(60,207,142,.6);animation:pulse 2.4s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(60,207,142,.55)}70%{box-shadow:0 0 0 8px rgba(60,207,142,0)}100%{box-shadow:0 0 0 0 rgba(60,207,142,0)}}
 .dash-skeleton{color:transparent !important;position:relative}
 .dash-skeleton::after{content:"";position:absolute;inset:20% 0 20% 0;max-width:60%;border-radius:6px;background:linear-gradient(90deg,var(--color-border-line),var(--color-panel),var(--color-border-line));background-size:200% 100%;animation:sk 1.2s linear infinite}
 .gb-chart.dash-skeleton::after,.gb-detail.dash-skeleton::after,.gb-legend.dash-skeleton::after{inset:0;max-width:none}
@@ -110,38 +116,43 @@ window.dash = (() => {
     run(); notify();
     const m = store.meta && store.meta.status === 'ok' ? store.meta.data : null;
     const el = document.getElementById('site-updated');
-    if (el && m && m.checked_at) el.textContent = 'Data checked ' + new Date(m.checked_at).toLocaleString('en-IE', { dateStyle: 'medium', timeStyle: 'short' });
+    if (el && m && m.checked_at) el.textContent = 'Live data · checked ' + new Date(m.checked_at).toLocaleString('en-IE', { dateStyle: 'medium', timeStyle: 'short' });
   });
   let t;
   window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(notify, 150); });
   const retheme = () => { api.colors.splice(0, 8, ...(isDark() ? DARK : LIGHT)); notify(); };
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', retheme);
-  api._toggleTheme = () => { document.documentElement.dataset.theme = isDark() ? 'light' : 'dark'; retheme(); };
+  api._toggleTheme = () => { const t = isDark() ? 'light' : 'dark'; document.documentElement.dataset.theme = t; try { localStorage.setItem('gb-theme', t); } catch (e) {} retheme(); label(); };
+  const label = () => { const b = document.getElementById('theme-btn'); if (b) b.textContent = isDark() ? '☀ Light' : '☾ Dark'; };
+  window.addEventListener('DOMContentLoaded', label);
   return api;
 })();
 </script>
 </head>
 <body>
 <div id="dash-root">
-<div class="site-bar"><span id="site-updated"></span><button type="button" onclick="dash._toggleTheme()">◐ Theme</button></div>
+<div class="site-bar"><span id="site-updated"></span><button type="button" id="theme-btn" onclick="dash._toggleTheme()">☀ Light</button></div>
 <style>
 .gb{
   --gb-c1:#1f3a5f; --gb-c2:#4f7c8a; --gb-c3:#b08d57; --gb-c4:#8c4a52; --gb-c5:#6f8f72; --gb-c6:#8a94a6; --gb-c7:#c9b48f; --gb-c8:#3f4b3b;
   --gb-ink:var(--color-fg); --gb-hair:var(--color-border-line);
+  --gb-glow:none; --gb-gridline:rgba(18,22,29,.04); --gb-kpi-hi:#1f3a5f;
+  --gb-hero:radial-gradient(120% 140% at 0% 0%, rgba(31,58,95,.07), transparent 55%), radial-gradient(90% 120% at 100% 0%, rgba(176,141,87,.09), transparent 60%), var(--color-panel);
   counter-reset: gbsec;
 }
 @media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]) .gb{--gb-c1:#8fb0d9; --gb-c2:#7fb3bf; --gb-c3:#d6b47e; --gb-c4:#cf8f98; --gb-c5:#9fc0a1; --gb-c6:#aab3c3; --gb-c7:#e3cfa6; --gb-c8:#b9c6ad}
+  :root:not([data-theme="light"]) .gb{--gb-c1:#6ea8ff; --gb-c2:#4fd1c5; --gb-c3:#e8b75c; --gb-c4:#ff7a8a; --gb-c5:#6fdc9a; --gb-c6:#9aa8c0; --gb-c7:#f0d29a; --gb-c8:#c1d39b; --gb-glow:url(#gb-glow); --gb-hero:radial-gradient(120% 140% at 0% 0%, rgba(110,168,255,.16), transparent 55%), radial-gradient(90% 120% at 100% 0%, rgba(232,183,92,.10), transparent 60%), var(--color-panel); --gb-gridline:rgba(255,255,255,.035); --gb-kpi-hi:#e8b75c}
 }
-:root[data-theme="dark"] .gb{--gb-c1:#8fb0d9; --gb-c2:#7fb3bf; --gb-c3:#d6b47e; --gb-c4:#cf8f98; --gb-c5:#9fc0a1; --gb-c6:#aab3c3; --gb-c7:#e3cfa6; --gb-c8:#b9c6ad}
+:root[data-theme="dark"] .gb{--gb-c1:#6ea8ff; --gb-c2:#4fd1c5; --gb-c3:#e8b75c; --gb-c4:#ff7a8a; --gb-c5:#6fdc9a; --gb-c6:#9aa8c0; --gb-c7:#f0d29a; --gb-c8:#c1d39b; --gb-glow:url(#gb-glow); --gb-hero:radial-gradient(120% 140% at 0% 0%, rgba(110,168,255,.16), transparent 55%), radial-gradient(90% 120% at 100% 0%, rgba(232,183,92,.10), transparent 60%), var(--color-panel); --gb-gridline:rgba(255,255,255,.035); --gb-kpi-hi:#e8b75c}
 
 #dash-root .gb{position:relative;font-family:var(--font-anthropic-sans);color:var(--color-fg);display:flex;flex-direction:column;gap:28px;font-variant-numeric:tabular-nums;letter-spacing:-0.005em}
 
 /* ---------- header ---------- */
-.gb .gb-head{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;padding-bottom:22px;border-bottom:1px solid var(--gb-ink)}
+.gb .gb-head{position:relative;display:grid;grid-template-columns:minmax(0,1fr);gap:12px;padding:clamp(24px,4vw,44px) clamp(20px,4vw,44px);border:1px solid var(--gb-hair);border-radius:14px;background:var(--gb-hero);overflow:hidden;isolation:isolate}
+.gb .gb-head::after{content:"";position:absolute;inset:0;z-index:-1;background-image:linear-gradient(var(--gb-gridline) 1px,transparent 1px),linear-gradient(90deg,var(--gb-gridline) 1px,transparent 1px);background-size:44px 44px;-webkit-mask-image:radial-gradient(80% 100% at 100% 0%,#000 10%,transparent 70%);mask-image:radial-gradient(80% 100% at 100% 0%,#000 10%,transparent 70%)}
 .gb .gb-eyebrow{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:600;color:var(--color-fg-muted);letter-spacing:.14em;text-transform:uppercase}
 .gb .gb-eyebrow::before{content:"";width:18px;height:2px;background:var(--gb-c3)}
-.gb .gb-title{font-family:var(--font-anthropic-serif);font-weight:400;font-size:clamp(2.2rem,4.5vw,3.25rem);line-height:1.02;letter-spacing:-0.02em;margin:0}
+.gb .gb-title{font-family:var(--font-anthropic-serif);font-weight:400;font-size:clamp(2.6rem,6vw,4.4rem);line-height:.98;letter-spacing:-0.02em;margin:0}
 .gb .gb-take{font-family:var(--font-anthropic-serif);font-size:clamp(1.05rem,1.6vw,1.25rem);color:var(--color-fg-muted);max-width:60rem;margin:4px 0 0;line-height:1.5;min-height:1.5em}
 .gb .gb-take b{font-weight:600;color:var(--gb-ink)}
 .gb .gb-asof{font-size:11.5px;color:var(--color-fg-muted);letter-spacing:.01em}
@@ -172,7 +183,11 @@ window.dash = (() => {
 .gb .gb-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,12rem),1fr));gap:1px;background:var(--gb-hair);border:1px solid var(--gb-hair);border-radius:8px;overflow:hidden}
 .gb .gb-kpi{background:var(--color-panel);padding:18px 20px 16px;display:flex;flex-direction:column;gap:6px;min-width:0}
 .gb .gb-klabel{font-size:10.5px;font-weight:600;color:var(--color-fg-muted);letter-spacing:.12em;text-transform:uppercase}
-.gb .gb-kval{font-family:var(--font-anthropic-serif);font-weight:400;font-size:clamp(1.6rem,2.4vw,2.05rem);line-height:1.1;letter-spacing:-0.015em;min-height:1.15em}
+.gb .gb-kval{font-family:var(--font-anthropic-serif);font-weight:400;font-size:clamp(1.8rem,2.8vw,2.45rem);line-height:1.08;letter-spacing:-0.015em;min-height:1.15em}
+.gb .gb-kpi:first-child .gb-kval{color:var(--gb-kpi-hi)}
+.gb .gb-kpi:first-child{background:linear-gradient(180deg,color-mix(in srgb,var(--gb-c3) 7%,var(--color-panel)),var(--color-panel))}
+.gb .glow{filter:var(--gb-glow)}
+.gb .gb-card{box-shadow:inset 0 1px 0 rgba(255,255,255,.025)}
 .gb .gb-ksub{font-size:11.5px;color:var(--color-fg-muted);min-height:1.3em;line-height:1.4}
 
 /* ---------- cards ---------- */
@@ -314,6 +329,7 @@ window.dash = (() => {
 </style>
 
 <div class="gb" id="gb">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="gb-glow" filterUnits="userSpaceOnUse" x="-2000" y="-2000" width="6000" height="6000"><feGaussianBlur stdDeviation="3.2" result="b"/><feColorMatrix in="b" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 .75 0" result="bb"/><feMerge><feMergeNode in="bb"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs></svg>
   <header class="gb-head" id="overview">
     <div class="gb-eyebrow">grenke group · Debt capital markets</div>
     <h1 class="gb-title">Issued bonds</h1>
@@ -719,7 +735,7 @@ dash.calc('bonds_eur', {
     const dim = (d) => (p.year && d !== p.year ? 0.28 : 1);
     const g = svg.append('g');
     series.forEach((s) => {
-      g.append('g').attr('fill', cs.color(s.key)).selectAll('rect').data(s.filter((d) => d[1] - d[0] > 0)).join('rect')
+      g.append('g').attr('class', 'glow').attr('fill', cs.color(s.key)).selectAll('rect').data(s.filter((d) => d[1] - d[0] > 0)).join('rect')
         .attr('x', (d) => x(d.data.year) + off).attr('width', bw)
         .attr('y', (d) => y(d[1])).attr('height', (d) => Math.max(0, y(d[0]) - y(d[1]) - 1.5))
         .attr('rx', 2).attr('opacity', (d) => dim(d.data.year));
@@ -757,7 +773,7 @@ dash.calc('bonds_eur', {
     const arc = d3.arc().innerRadius(r * 0.76).outerRadius(r - 5).cornerRadius(1.5);
     const arcOn = d3.arc().innerRadius(r * 0.76).outerRadius(r).cornerRadius(1.5);
     const sel = p[d.param];
-    g.selectAll('path').data(pie(data)).join('path').attr('class', 'hit')
+    g.selectAll('path').data(pie(data)).join('path').attr('class', 'hit glow')
       .attr('d', (a) => (sel === a.data[0] ? arcOn(a) : arc(a)))
       .attr('fill', (a) => cs.color(a.data[0]))
       .attr('opacity', (a) => (sel && sel !== a.data[0] ? 0.3 : 1))
@@ -813,7 +829,7 @@ dash.calc('bonds_eur', {
       svg.append('text').attr('class', 'tick-l').attr('x', w - m.r).attr('y', y(wc) - 5).attr('text-anchor', 'end').text(`Weighted avg ${fmtPct2(wc)}`);
     }
     const sorted = [...pts].sort((a, b) => b.eur - a.eur);
-    svg.append('g').selectAll('circle').data(sorted, (d) => d.isin).join('circle').attr('class', 'hit')
+    svg.append('g').selectAll('circle').data(sorted, (d) => d.isin).join('circle').attr('class', 'hit glow')
       .attr('cx', (d) => x(d.maturity)).attr('cy', (d) => y(d.coupon)).attr('r', (d) => rs(d.eur))
       .attr('fill', (d) => cs.color(cs.dim.key(d))).attr('fill-opacity', (d) => (p.isin && p.isin !== d.isin ? 0.2 : 0.62))
       .attr('stroke', (d) => (p.isin === d.isin ? 'var(--color-fg)' : cs.color(cs.dim.key(d))))
@@ -927,7 +943,7 @@ dash.calc('bonds_eur', {
     g.append('rect').attr('x', (d) => x(d.issue)).attr('y', (d, i) => yy(i) + 9).attr('height', 8).attr('rx', 1.5)
       .attr('width', (d) => Math.max(2, endX(d) - x(d.issue))).attr('fill', (d) => cs.color(cs.dim.key(d))).attr('opacity', 0.2);
     g.append('rect').attr('x', (d) => x(d.issue)).attr('y', (d, i) => yy(i) + 9).attr('height', 8).attr('rx', 1.5)
-      .attr('width', (d) => Math.max(2, Math.min(endX(d), x(now)) - x(d.issue))).attr('fill', (d) => cs.color(cs.dim.key(d)));
+      .attr('width', (d) => Math.max(2, Math.min(endX(d), x(now)) - x(d.issue))).attr('fill', (d) => cs.color(cs.dim.key(d))).attr('class', 'glow');
     g.filter((d) => d.esg !== 'Conventional').append('text').attr('x', (d) => endX(d) + 6).attr('y', (d, i) => yy(i) + 13).attr('dy', '0.32em')
       .attr('text-anchor', 'start').style('font-size', '9px').style('letter-spacing', '.08em').attr('fill', (d) => PAL[(ESG_SLOT[d.esg] || 6) - 1]).text((d) => d.esg.toUpperCase());
     svg.append('line').attr('class', 'ref-l').attr('x1', x(now)).attr('x2', x(now)).attr('y1', m.t - 14).attr('y2', h - m.b);
@@ -959,9 +975,9 @@ dash.calc('bonds_eur', {
     svg.append('g').selectAll('text').data(y2t).join('text').attr('class', 'tick-l').attr('x', w - m.r + 8).attr('y', (d) => y2(d)).attr('dy', '0.32em').text((d) => d + '%');
     const bw = Math.min(26, x.bandwidth()), off = (x.bandwidth() - bw) / 2;
     svg.append('g').selectAll('rect').data(data).join('rect').attr('x', (d) => x(d.yr) + off).attr('width', bw)
-      .attr('y', (d) => y(d.eur)).attr('height', (d) => y(0) - y(d.eur)).attr('rx', 1.5).attr('fill', PAL[0]).attr('opacity', 0.9);
+      .attr('y', (d) => y(d.eur)).attr('height', (d) => y(0) - y(d.eur)).attr('rx', 1.5).attr('fill', PAL[0]).attr('opacity', 0.9).attr('class', 'glow');
     const line = d3.line().defined((d) => d.cpn != null).x((d) => x(d.yr) + x.bandwidth() / 2).y((d) => y2(d.cpn));
-    svg.append('path').datum(data).attr('d', line).attr('fill', 'none').attr('stroke', PAL[2]).attr('stroke-width', 2).attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
+    svg.append('path').datum(data).attr('d', line).attr('class', 'glow').attr('fill', 'none').attr('stroke', PAL[2]).attr('stroke-width', 2).attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
     svg.append('g').selectAll('circle').data(data.filter((d) => d.cpn != null)).join('circle')
       .attr('cx', (d) => x(d.yr) + x.bandwidth() / 2).attr('cy', (d) => y2(d.cpn)).attr('r', 4).attr('fill', 'var(--color-panel)').attr('stroke', PAL[2]).attr('stroke-width', 2);
     svg.append('line').attr('class', 'axis-l').attr('x1', m.l).attr('x2', w - m.r).attr('y1', y(0)).attr('y2', y(0));
@@ -996,7 +1012,7 @@ dash.calc('bonds_eur', {
       ]))
       .on('mouseleave', hideTip);
     g.append('text').attr('class', 'tick-l').attr('x', ml - 10).attr('y', rowH / 2 - 4).attr('dy', '0.32em').attr('text-anchor', 'end').text((d) => d[0]);
-    g.append('rect').attr('x', ml).attr('y', rowH / 2 - 11).attr('height', 14).attr('rx', 1.5).attr('fill', (d) => cs.color(d[0]))
+    g.append('rect').attr('x', ml).attr('y', rowH / 2 - 11).attr('height', 14).attr('rx', 1.5).attr('class', 'glow').attr('fill', (d) => cs.color(d[0]))
       .attr('width', (d) => Math.max(2, x(d[1].cost) - ml));
     g.append('text').attr('class', 'val-l').attr('x', (d) => x(d[1].cost) + 6).attr('y', rowH / 2 - 4).attr('dy', '0.32em').text((d) => fmtEUR(d[1].cost));
   }
@@ -1214,7 +1230,7 @@ dash.calc('bonds_eur', {
     const up = d3.sum(ys, (d) => d.delta) >= 0;
     svg.append('path').datum(ys).attr('d', area).attr('fill', up ? PAL[3] : PAL[4]).attr('opacity', 0.16);
     svg.append('path').datum(ys).attr('d', d3.line().x((d) => x(d.y)).y((d) => y(d.base))).attr('fill', 'none').attr('stroke', 'var(--color-fg-muted)').attr('stroke-width', 1.5).attr('stroke-dasharray', '4 3');
-    svg.append('path').datum(ys).attr('d', d3.line().x((d) => x(d.y)).y((d) => y(d.scen))).attr('fill', 'none').attr('stroke', PAL[0]).attr('stroke-width', 2.25).attr('stroke-linejoin', 'round').attr('stroke-linecap', 'round');
+    svg.append('path').datum(ys).attr('d', d3.line().x((d) => x(d.y)).y((d) => y(d.scen))).attr('class', 'glow').attr('fill', 'none').attr('stroke', PAL[0]).attr('stroke-width', 2.25).attr('stroke-linejoin', 'round').attr('stroke-linecap', 'round');
     const sel = ys.find((d) => d.y === sim.yr);
     if (sel) {
       svg.append('line').attr('class', 'ref-l').attr('x1', x(sel.y)).attr('x2', x(sel.y)).attr('y1', 12).attr('y2', h - 24);
@@ -1248,7 +1264,7 @@ dash.calc('bonds_eur', {
     svg.append('g').selectAll('text').data(yt).join('text').attr('class', 'tick-l').attr('x', ml - 8).attr('y', (d) => y(d)).attr('dy', '0.32em').attr('text-anchor', 'end').text(fmtAxisEUR);
     const g = svg.append('g').selectAll('g').data(data).join('g').attr('transform', (d) => `translate(${x(String(d.y))},0)`);
     g.append('rect').attr('x', inner('today')).attr('width', inner.bandwidth()).attr('y', (d) => y(d.today)).attr('height', (d) => y(0) - y(d.today)).attr('rx', 1.5).attr('fill', PAL[5]).attr('opacity', 0.55);
-    g.append('rect').attr('x', inner('after')).attr('width', inner.bandwidth()).attr('y', (d) => y(d.after)).attr('height', (d) => y(0) - y(d.after)).attr('rx', 1.5).attr('fill', PAL[2]);
+    g.append('rect').attr('class', 'glow').attr('x', inner('after')).attr('width', inner.bandwidth()).attr('y', (d) => y(d.after)).attr('height', (d) => y(0) - y(d.after)).attr('rx', 1.5).attr('fill', PAL[2]);
     svg.append('line').attr('class', 'axis-l').attr('x1', ml).attr('x2', w - 4).attr('y1', y(0)).attr('y2', y(0));
     const every = Math.ceil(data.length / Math.max(1, Math.floor((w - ml) / 34)));
     svg.append('g').selectAll('text').data(data.filter((_, i) => i % every === 0)).join('text').attr('class', 'tick-l')
