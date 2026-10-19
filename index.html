@@ -180,10 +180,10 @@ window.dash = (() => {
 .gb .gb-pill{font:inherit;font-size:11.5px;padding:4px 10px;border-radius:4px;border:1px solid var(--gb-c3);background:transparent;color:var(--color-fg);cursor:pointer}
 
 /* ---------- KPI strip ---------- */
-.gb .gb-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,12rem),1fr));gap:1px;background:var(--gb-hair);border:1px solid var(--gb-hair);border-radius:8px;overflow:hidden}
+.gb .gb-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,10.5rem),1fr));gap:1px;background:var(--gb-hair);border:1px solid var(--gb-hair);border-radius:8px;overflow:hidden}
 .gb .gb-kpi{background:var(--color-panel);padding:18px 20px 16px;display:flex;flex-direction:column;gap:6px;min-width:0}
 .gb .gb-klabel{font-size:10.5px;font-weight:600;color:var(--color-fg-muted);letter-spacing:.12em;text-transform:uppercase}
-.gb .gb-kval{font-family:var(--font-anthropic-serif);font-weight:400;font-size:clamp(1.8rem,2.8vw,2.45rem);line-height:1.08;letter-spacing:-0.015em;min-height:1.15em}
+.gb .gb-kval{font-family:var(--font-anthropic-serif);font-weight:400;white-space:nowrap;font-size:clamp(1.45rem,1.9vw,2.05rem);line-height:1.08;letter-spacing:-0.015em;min-height:1.15em}
 .gb .gb-kpi:first-child .gb-kval{color:var(--gb-kpi-hi)}
 .gb .gb-kpi:first-child{background:linear-gradient(180deg,color-mix(in srgb,var(--gb-c3) 7%,var(--color-panel)),var(--color-panel))}
 .gb .glow{filter:var(--gb-glow)}
@@ -310,6 +310,62 @@ window.dash = (() => {
 .gb .gb-key{display:inline-flex;gap:6px;align-items:center}
 .gb .gb-key i{display:inline-block;width:14px;height:3px;border-radius:1px}
 
+/* ---------- definitions, findings, concentration, methodology ---------- */
+.gb .gb-i{display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;border-radius:50%;border:1px solid var(--color-fg-muted);font-size:9px;font-style:normal;font-weight:600;letter-spacing:0;text-transform:none;margin-left:5px;cursor:help;vertical-align:1px;opacity:.75}
+.gb .gb-i:hover,.gb .gb-i:focus{opacity:1;outline:none;border-color:var(--gb-c3);color:var(--gb-c3)}
+.gb .gb-klabel{cursor:help}
+.gb .gb-tip .tx{line-height:1.5;color:var(--color-fg);max-width:19rem;white-space:normal}
+.gb .gb-insights{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,19rem),1fr));gap:14px}
+.gb .gb-ins{border:1px solid var(--gb-hair);border-radius:8px;padding:16px 18px 14px;display:flex;flex-direction:column;gap:8px;background:var(--color-panel);position:relative;overflow:hidden}
+.gb .gb-ins::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--gb-c3)}
+.gb .gb-ins .tag{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--gb-c3)}
+.gb .gb-ins .t{font-family:var(--font-anthropic-serif);font-size:1.12rem;line-height:1.3;letter-spacing:-0.01em}
+.gb .gb-ins .e{font-size:12.5px;line-height:1.5;color:var(--color-fg)}
+.gb .gb-ins dl{margin:4px 0 0;display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:11px;color:var(--color-fg-muted);border-top:1px solid var(--gb-hair);padding-top:8px}
+.gb .gb-ins dt{font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-size:9.5px;padding-top:1px}
+.gb .gb-ins dd{margin:0;line-height:1.45}
+.gb .gb-wsum{font-size:12.5px;line-height:1.5;color:var(--color-fg);margin:2px 0 0;padding-top:10px;border-top:1px solid var(--gb-hair)}
+.gb .gb-drill:empty{display:none}
+.gb .gb-drillh{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gb-c3);margin:6px 0}
+.gb .gb-mini{width:100%;border-collapse:collapse;font-size:12px}
+.gb .gb-mini th{text-align:left;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--color-fg-muted);padding:6px 8px;border-bottom:1px solid var(--gb-hair)}
+.gb .gb-mini td{padding:7px 8px;border-bottom:1px solid var(--gb-hair);white-space:nowrap}
+.gb .gb-mini .num{text-align:right}
+.gb .gb-mini tr.click{cursor:pointer}
+.gb .gb-mini tr.click:hover{background:var(--color-bg)}
+.gb .gb-mini tr.mine td{font-weight:600}
+.gb .gb-mini .up{color:var(--gb-c4)} .gb .gb-mini .down{color:var(--gb-c5)}
+.gb .gb-simright{display:flex;flex-direction:column;gap:14px;min-width:0}
+.gb .gb-compare{overflow-x:auto}
+.gb .gb-conc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:36px;align-items:start}
+@media (max-width:900px){.gb .gb-conc{grid-template-columns:minmax(0,1fr)}}
+.gb .gb-crow{display:grid;grid-template-columns:6.5rem 1fr 3.4rem;gap:10px;align-items:center;font-size:12.5px;padding:7px 0}
+.gb .gb-cbar{height:8px;border-radius:2px;background:var(--gb-hair);position:relative;overflow:hidden}
+.gb .gb-cbar i{position:absolute;left:0;top:0;bottom:0;border-radius:2px}
+.gb .gb-crow .v{text-align:right;font-variant-numeric:tabular-nums}
+.gb .gb-cnote{font-size:12px;line-height:1.5;color:var(--color-fg-muted);margin:10px 0 0;padding-top:10px;border-top:1px solid var(--gb-hair)}
+.gb .gb-cnote b{color:var(--color-fg);font-weight:600}
+.gb .gb-stack{display:flex;height:14px;border-radius:3px;overflow:hidden;gap:2px;margin:6px 0 12px}
+.gb .gb-stack i{display:block;height:100%}
+.gb .gb-blist{display:grid;grid-template-columns:10px 1fr auto 3.2rem 3.4rem;gap:6px 10px;align-items:center;font-size:12.5px}
+.gb .gb-blist .m{color:var(--color-fg-muted);text-align:right}
+.gb .gb-method{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:36px}
+@media (max-width:900px){.gb .gb-method{grid-template-columns:minmax(0,1fr)}}
+.gb .gb-method h3{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gb-c3);margin:18px 0 8px}
+.gb .gb-method h3:first-child{margin-top:0}
+.gb .gb-method ul{margin:0;padding-left:18px;font-size:12.5px;line-height:1.55;color:var(--color-fg)}
+.gb .gb-method li{margin-bottom:5px}
+.gb .gb-method li b{font-weight:600}
+.gb .gb-method a,.gb a.gb-doc{color:var(--gb-c1);text-decoration:none;border-bottom:1px solid currentColor}
+.gb .gb-audit{display:grid;grid-template-columns:auto 1fr;gap:0;margin:0;font-size:12.5px;border-top:1px solid var(--gb-hair)}
+.gb .gb-audit dt,.gb .gb-audit dd{padding:7px 0;border-bottom:1px solid var(--gb-hair);margin:0}
+.gb .gb-audit dt{color:var(--color-fg-muted);padding-right:16px}
+.gb .gb-audit .ok{color:var(--gb-c5)} .gb .gb-audit .warn{color:var(--gb-c3)}
+.gb .gb-concepts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--gb-hair);border:1px solid var(--gb-hair);border-radius:6px;overflow:hidden;margin-top:4px}
+.gb .gb-concepts div{background:var(--color-panel);padding:10px 12px;font-size:11.5px;line-height:1.45;color:var(--color-fg-muted)}
+.gb .gb-concepts b{display:block;color:var(--color-fg);font-weight:600;font-size:12px;margin-bottom:2px}
+.gb .gb-table td.muted{color:var(--color-fg-muted)}
+
 /* ---------- misc ---------- */
 .gb .gb-tip{position:absolute;pointer-events:none;background:var(--cds-surface-popover);border:1px solid var(--cds-border);border-radius:6px;box-shadow:var(--cds-shadow-popover);padding:8px 11px;font-size:12px;z-index:10;opacity:0;transition:opacity 120ms;max-width:18rem;min-width:11rem}
 .gb .gb-tip.on{opacity:1}
@@ -334,7 +390,7 @@ window.dash = (() => {
     <div class="gb-eyebrow">grenke group · Debt capital markets</div>
     <h1 class="gb-title">Issued bonds</h1>
     <p class="gb-take dash-skeleton" id="gb-take" data-source="bonds bonds_eur">—</p>
-    <div class="gb-asof">EUR equivalents at ECB reference rates of <span data-source="fx" data-field="rate_date" data-row="0">—</span> · bond terms as published on grenke.com</div>
+    <div class="gb-asof">Issue sizes and coupons as published on grenke.com · EUR equivalents at ECB reference rates of <span data-source="fx" data-field="rate_date" data-row="0">—</span> · reference date <span id="gb-ref">—</span> · independent analysis, not an official grenke publication</div>
   </header>
 
   <section class="gb-filters" id="filters" aria-label="Filters">
@@ -350,18 +406,26 @@ window.dash = (() => {
   </section>
 
   <section class="gb-kpis" id="kpis" data-source="bonds bonds_eur">
-    <div class="gb-kpi"><div class="gb-klabel">Nominal outstanding (EUR eq.)</div><div class="gb-kval dash-skeleton" id="k1">—</div><div class="gb-ksub" id="k1s"></div></div>
-    <div class="gb-kpi"><div class="gb-klabel">Weighted avg. coupon</div><div class="gb-kval dash-skeleton" id="k2">—</div><div class="gb-ksub" id="k2s"></div></div>
-    <div class="gb-kpi"><div class="gb-klabel">Weighted avg. life</div><div class="gb-kval dash-skeleton" id="k3">—</div><div class="gb-ksub" id="k3s"></div></div>
-    <div class="gb-kpi"><div class="gb-klabel">Annual coupon cost</div><div class="gb-kval dash-skeleton" id="k4">—</div><div class="gb-ksub" id="k4s"></div></div>
-    <div class="gb-kpi"><div class="gb-klabel">ESG-labelled share</div><div class="gb-kval dash-skeleton" id="k5">—</div><div class="gb-ksub" id="k5s"></div></div>
-    <div class="gb-kpi"><div class="gb-klabel">Next redemption</div><div class="gb-kval dash-skeleton" id="k6">—</div><div class="gb-ksub" id="k6s"></div></div>
+    <div class="gb-kpi" data-k="k1"><div class="gb-klabel">Issued nominal · live<i class="gb-i" tabindex="0" aria-label="Definition">i</i></div><div class="gb-kval dash-skeleton" id="k1">—</div><div class="gb-ksub" id="k1s"></div></div>
+    <div class="gb-kpi" data-k="k2"><div class="gb-klabel">Due ≤ 12 months<i class="gb-i" tabindex="0" aria-label="Definition">i</i></div><div class="gb-kval dash-skeleton" id="k2">—</div><div class="gb-ksub" id="k2s"></div></div>
+    <div class="gb-kpi" data-k="k3"><div class="gb-klabel">Due ≤ 24 months<i class="gb-i" tabindex="0" aria-label="Definition">i</i></div><div class="gb-kval dash-skeleton" id="k3">—</div><div class="gb-ksub" id="k3s"></div></div>
+    <div class="gb-kpi" data-k="k4"><div class="gb-klabel">Due ≤ 5 years<i class="gb-i" tabindex="0" aria-label="Definition">i</i></div><div class="gb-kval dash-skeleton" id="k4">—</div><div class="gb-ksub" id="k4s"></div></div>
+    <div class="gb-kpi" data-k="k5"><div class="gb-klabel">Weighted avg. coupon<i class="gb-i" tabindex="0" aria-label="Definition">i</i></div><div class="gb-kval dash-skeleton" id="k5">—</div><div class="gb-ksub" id="k5s"></div></div>
+    <div class="gb-kpi" data-k="k6"><div class="gb-klabel">Annual contractual coupon<i class="gb-i" tabindex="0" aria-label="Definition">i</i></div><div class="gb-kval dash-skeleton" id="k6">—</div><div class="gb-ksub" id="k6s"></div></div>
+    <div class="gb-kpi" data-k="k7"><div class="gb-klabel">Weighted avg. life<i class="gb-i" tabindex="0" aria-label="Definition">i</i></div><div class="gb-kval dash-skeleton" id="k7">—</div><div class="gb-ksub" id="k7s"></div></div>
+  </section>
+
+  <section class="gb-card" id="findings">
+    <div class="gb-ch"><div><h2 class="gb-ct">Key findings</h2><p class="gb-cn">Rule-based observations computed from the bonds in the current filters. Each one states its evidence, period, sources and limits; none of them is a forecast.</p></div></div>
+    <div class="gb-insights" id="c-insights" data-source="bonds bonds_eur"></div>
   </section>
 
   <div class="gb-grid">
     <section class="gb-card" id="maturity-wall">
-      <div class="gb-ch"><div><h2 class="gb-ct">Maturity wall</h2><p class="gb-cn">Nominal due per year, EUR equivalent · click a year to filter everything</p></div></div>
+      <div class="gb-ch"><div><h2 class="gb-ct">Maturity wall</h2><p class="gb-cn">Issued nominal falling due per year, EUR equivalent, with the number of bonds · peak year outlined · click a year to see its bonds and filter everything</p></div></div>
       <div class="gb-chart" id="c-wall" data-source="bonds bonds_eur" style="min-height:280px"></div>
+      <p class="gb-wsum" id="wall-sum" data-source="bonds bonds_eur"></p>
+      <div class="gb-drill" id="wall-drill" data-source="bonds bonds_eur"></div>
     </section>
     <section class="gb-card" id="mix">
       <div class="gb-ch"><div><h2 class="gb-ct">Funding mix</h2><p class="gb-cn">Share of nominal · click a slice or row to filter</p></div>
@@ -382,18 +446,19 @@ window.dash = (() => {
   </div>
 
   <section class="gb-card gb-sim" id="what-if">
-    <div class="gb-ch"><div><h2 class="gb-ct">What-if: refinancing &amp; FX</h2><p class="gb-cn">Move the sliders. Every bond is refinanced at maturity at your coupon and tenor; the comparison is rolling each bond at its current coupon. Uses the live bonds in the current filters.</p></div><div class="gb-presets" id="s-presets"></div></div>
+    <div class="gb-ch"><div><h2 class="gb-ct">Refinancing scenarios</h2><p class="gb-cn"><b>Hypothetical scenarios, not forecasts.</b> Live bonds maturing up to the chosen year are refinanced in the chosen share at the new-issue coupon; the rest is repaid from own resources. Compared with every bond keeping today’s coupon. Uses the bonds in the current filters.</p></div><div class="gb-presets" id="s-presets"></div></div>
     <div class="gb-simgrid">
       <div class="gb-controls">
-        <div><div class="gb-sl-top"><label for="s-cpn">New-issue coupon</label><b id="s-cpn-v">—</b></div><input class="gb-range" id="s-cpn" type="range" min="2" max="9" step="0.125"><div class="gb-sl-ends"><span>2%</span><span>9%</span></div></div>
+        <div><div class="gb-sl-top"><label for="s-cpn">New-issue coupon</label><b id="s-cpn-v">—</b></div><input class="gb-range" id="s-cpn" type="range" min="2" max="9" step="0.05"><div class="gb-sl-ends"><span>2%</span><span>9%</span></div></div>
+        <div><div class="gb-sl-top"><label for="s-share">Share refinanced</label><b id="s-share-v">—</b></div><input class="gb-range" id="s-share" type="range" min="0" max="100" step="5"><div class="gb-sl-ends"><span>0% · all repaid</span><span>100%</span></div></div>
         <div><div class="gb-sl-top"><label for="s-ten">Tenor of new bonds</label><b id="s-ten-v">—</b></div><input class="gb-range" id="s-ten" type="range" min="2" max="8" step="1"><div class="gb-sl-ends"><span>2 yrs</span><span>8 yrs</span></div></div>
         <div><div class="gb-sl-top"><label for="s-fx">EUR vs. other currencies</label><b id="s-fx-v">—</b></div><input class="gb-range" id="s-fx" type="range" min="-20" max="20" step="1"><div class="gb-sl-ends"><span>EUR −20%</span><span>EUR +20%</span></div><div class="gb-sl-note" id="s-fx-note"></div></div>
         <div><div class="gb-sl-top"><label for="s-yr">Year to look at</label><b id="s-yr-v">—</b></div><input class="gb-range" id="s-yr" type="range" min="2027" max="2033" step="1"><div class="gb-sl-ends"><span>2027</span><span>2033</span></div></div>
       </div>
-      <div class="gb-simout" id="s-out" data-source="bonds bonds_eur"></div>
+      <div class="gb-simright"><div class="gb-simout" id="s-out" data-source="bonds bonds_eur"></div><div class="gb-compare" id="s-compare" data-source="bonds bonds_eur"></div><p class="gb-subn" id="s-refnote"></p></div>
     </div>
     <div class="gb-simcharts">
-      <div><h3 class="gb-subt">Annual coupon cost</h3><p class="gb-subn"><span class="gb-key"><i style="background:var(--gb-c1)"></i>Your scenario</span><span class="gb-key"><i style="background:var(--color-fg-muted)"></i>Rolled at today's coupons</span><span>· click a year</span></p><div class="gb-chart" id="s-cost" data-source="bonds bonds_eur" style="min-height:240px"></div></div>
+      <div><h3 class="gb-subt">Annual coupon cost</h3><p class="gb-subn"><span class="gb-key"><i style="background:var(--gb-c1)"></i>Your scenario</span><span class="gb-key"><i style="background:var(--color-fg-muted)"></i>Every bond keeps today's coupon</span><span>· click a year</span></p><div class="gb-chart" id="s-cost" data-source="bonds bonds_eur" style="min-height:240px"></div></div>
       <div><h3 class="gb-subt">Maturity profile after refinancing</h3><p class="gb-subn"><span class="gb-key"><i style="background:var(--gb-c6)"></i>Due today</span><span class="gb-key"><i style="background:var(--gb-c3)"></i>New bonds fall due</span></p><div class="gb-chart" id="s-wall" data-source="bonds bonds_eur" style="min-height:240px"></div></div>
     </div>
   </section>
@@ -403,13 +468,18 @@ window.dash = (() => {
     <div class="gb-chart" id="c-gantt" data-source="bonds bonds_eur" style="min-height:200px"></div>
   </section>
 
+  <section class="gb-card" id="concentration">
+    <div class="gb-ch"><div><h2 class="gb-ct">Concentration &amp; maturity buckets</h2><p class="gb-cn">How much of the live issued nominal sits in a few bonds, and how it splits by time to maturity. Concentration among bonds only, not across grenke’s wider funding sources.</p></div></div>
+    <div class="gb-conc" id="c-conc" data-source="bonds bonds_eur"></div>
+  </section>
+
   <div class="gb-grid even">
     <section class="gb-card" id="vintage">
       <div class="gb-ch"><div><h2 class="gb-ct">Issuance by vintage</h2><p class="gb-cn">Bars: EUR nominal issued per year · line: weighted coupon of that year's issues</p></div></div>
       <div class="gb-chart" id="c-vintage" data-source="bonds bonds_eur" style="min-height:260px"></div>
     </section>
     <section class="gb-card" id="coupon-cost">
-      <div class="gb-ch"><div><h2 class="gb-ct">Annual coupon cost</h2><p class="gb-cn" id="cost-note">EUR m per year, by the colour grouping</p></div></div>
+      <div class="gb-ch"><div><h2 class="gb-ct">Annual contractual coupon</h2><p class="gb-cn" id="cost-note">EUR per year, by the colour grouping</p></div></div>
       <div class="gb-chart" id="c-cost" data-source="bonds bonds_eur" style="min-height:220px"></div>
     </section>
   </div>
@@ -422,7 +492,7 @@ window.dash = (() => {
           <th data-field="isin" data-k="isin"><button type="button">ISIN</button></th>
           <th data-field="issuer_short" data-k="issuer_short"><button type="button">Issuer</button></th>
           <th data-field="currency" data-k="currency"><button type="button">Ccy</button></th>
-          <th class="num hide-narrow" data-field="amount_m" data-k="amount"><button type="button">Amount (m, local)</button></th>
+          <th class="num hide-narrow" data-field="amount_m" data-k="amount"><button type="button">Issued (m, local)</button></th>
           <th class="num" data-source="bonds_eur" data-field="amount_eur_m" data-k="eur"><button type="button">EUR eq. (m)</button></th>
           <th class="num" data-field="coupon_pct" data-k="coupon"><button type="button">Coupon</button></th>
           <th class="hide-narrow" data-field="issue_date" data-k="issue"><button type="button">Issued</button></th>
@@ -430,6 +500,7 @@ window.dash = (() => {
           <th class="num" data-source="bonds_eur" data-field="years_left" data-k="left"><button type="button">Years left</button></th>
           <th class="num hide-narrow" data-source="bonds_eur" data-field="annual_coupon_eur_m" data-k="cost"><button type="button">Coupon / yr (EUR m)</button></th>
           <th data-field="esg" data-k="esg"><button type="button">ESG</button></th>
+          <th class="hide-narrow" data-field="doc_type" data-k="docs"><button type="button">Docs</button></th>
           <th data-source="bonds_eur" data-field="status" data-k="status"><button type="button">Status</button></th>
         </tr></thead>
         <tbody id="t-body"></tbody>
@@ -437,7 +508,54 @@ window.dash = (() => {
     </div>
   </section>
 
-  <p class="gb-foot">Source: grenke AG, "Issued bonds" overview (main publicly issued bonds of the group's European and international issuing entities). Non-EUR bonds converted at ECB euro reference rates; amounts are nominal, not market value. The AT1 bond is perpetual: it counts toward nominal and coupon cost but not toward weighted average life or the maturity years. Indicative analysis, not an official grenke report.</p>
+<section class="gb-card" id="methodology">
+    <div class="gb-ch"><div><h2 class="gb-ct">Methodology, sources &amp; data audit</h2><p class="gb-cn">What the numbers are, where they come from, and what they cannot tell you.</p></div></div>
+    <div class="gb-method">
+      <div>
+        <h3>Data audit · live check</h3>
+        <dl class="gb-audit" id="m-audit" data-source="bonds fx"></dl>
+        <h3>Sources</h3>
+        <ul>
+          <li><b>Bond terms:</b> grenke AG, <a href="https://www.grenke.com/en/investor-relations/debt-capital/issued-bonds/" target="_blank" rel="noopener">Issued bonds</a> overview (issuer, currency, issue size, coupon, dates, ESG label), plus the Final Terms, prospectus or pricing supplement linked there for each bond (Docs column).</li>
+          <li><b>FX:</b> <a href="https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html" target="_blank" rel="noopener">ECB euro reference rates</a> of <span id="m-fxdate">—</span>, one rate per currency for every conversion. Local amounts are kept in the table.</li>
+          <li><b>Refresh:</b> an automated job re-reads both sources every weekday and only replaces the bond list when the page parses cleanly.</li>
+        </ul>
+        <h3>Four different "costs"</h3>
+        <div class="gb-concepts">
+          <div><b>Contractual coupon</b>The fixed rate written in each bond. What this dashboard shows.</div>
+          <div><b>Coupon expense</b>Nominal × coupon per year. Shown as "annual contractual coupon".</div>
+          <div><b>Effective funding cost</b>Adds issue price, fees and hedging. Not computable from this data.</div>
+          <div><b>Marginal refinancing cost</b>What a new bond would cost today. Approximated in the simulator, labelled as an assumption.</div>
+        </div>
+      </div>
+      <div>
+        <h3>Definitions</h3>
+        <ul>
+          <li><b>Issued nominal:</b> the issue size published by grenke. It is not a verified outstanding balance; buybacks, taps or partial redemptions would not show on that page.</li>
+          <li><b>Live:</b> final maturity on or after today’s date; the perpetual AT1 counts as live. Matured bonds are excluded unless the Matured status filter is chosen.</li>
+          <li><b>Due ≤ 12 / 24 months, ≤ 5 years:</b> issued nominal of live bonds whose final maturity falls between today and the end of the window.</li>
+          <li><b>Weighted average coupon:</b> coupon rates weighted by EUR issued nominal.</li>
+          <li><b>Annual contractual coupon:</b> issued nominal × coupon, in EUR. Every bond in scope pays a fixed coupon, so this is the yearly amount whether it is paid annually or semi-annually; payment dates and day-count conventions are not modelled.</li>
+          <li><b>Weighted average life:</b> years to final maturity, weighted by EUR nominal; the AT1 is excluded.</li>
+          <li><b>Effective number of bonds:</b> 1 ÷ the Herfindahl index (sum of squared nominal shares). It equals the bond count only if all bonds were the same size.</li>
+        </ul>
+        <h3>Simulator assumptions</h3>
+        <ul>
+          <li>Live bonds maturing by the chosen year are refinanced in the chosen share at the new-issue coupon, in EUR, for the same EUR amount; the remainder is repaid and stops paying interest.</li>
+          <li><span id="m-base">Base new-issue coupon: nominal-weighted coupon of recent EUR senior issues.</span> Favourable = base − 1.00 pp, adverse = base + 2.00 pp. These are assumptions, not market quotes.</li>
+          <li>Interest accrues by calendar year from each maturity date. Issue fees, discounts and hedging costs are ignored. The FX slider moves all non-EUR currencies by the same percentage against the EUR.</li>
+        </ul>
+        <h3>Limitations</h3>
+        <ul>
+          <li>Covers only the bonds on grenke’s public page. Deposits, ABS, bank facilities, commercial paper and other funding are outside the data, so nothing here measures total debt, liquidity or credit quality.</li>
+          <li>The AT1 coupon is discretionary and may reset at call dates; call dates are not modelled. Currency hedges are unknown and not reflected.</li>
+          <li>Independent analysis of public information. Not affiliated with or endorsed by grenke AG, and not investment advice.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <p class="gb-foot">Data: grenke AG "Issued bonds" overview and linked bond documentation; ECB euro reference rates. Amounts are issued nominal converted to EUR, not market values or verified outstanding balances. Independent analysis — not an official grenke publication and not investment advice.</p>
 
   <div class="gb-tip" id="gb-tip" role="tooltip"></div>
 </div>
@@ -494,6 +612,7 @@ dash.calc('bonds_eur', {
   const fmtInt = d3.format(',');
   const fmtEUR = (m) => {
     if (m == null || !isFinite(m)) return '—';
+    if (Math.abs(m) < 0.05) return 'EUR 0m';
     if (Math.abs(m) >= 1000) return 'EUR ' + d3.format(',.2f')(m / 1000) + 'bn';
     return 'EUR ' + (Math.abs(m) < 100 ? d3.format(',.1f')(m) : fmtInt(Math.round(m))) + 'm';
   };
@@ -527,6 +646,8 @@ dash.calc('bonds_eur', {
         issue: new Date(r.issue_date),
         maturity: r.maturity_date ? new Date(r.maturity_date) : null,
         esg: r.esg || 'Conventional',
+        doc_url: r.doc_url || '',
+        doc_type: r.doc_type || 'Not linked',
         eur: Number(k.amount_eur_m),
         cost: Number(k.annual_coupon_eur_m),
         tenor: k.tenor_years == null ? null : Number(k.tenor_years),
@@ -607,6 +728,14 @@ dash.calc('bonds_eur', {
     tip.style.top = y + 'px';
   }
   const hideTip = () => tip.classList.remove('on');
+  function setTipText(event, title, text) {
+    tip.replaceChildren();
+    const t = document.createElement('div'); t.className = 'tt'; t.textContent = title;
+    const x = document.createElement('div'); x.className = 'tx'; x.textContent = text;
+    tip.append(t, x);
+    moveTip(event);
+    tip.classList.add('on');
+  }
 
   function failOrWait(els) {
     const st = ['bonds', 'fx', 'bonds_eur'].map((id) => dash.data(id).status);
@@ -662,44 +791,272 @@ dash.calc('bonds_eur', {
   $('#f-reset').addEventListener('click', () => { q = ''; $('#f-q').value = ''; Object.assign(sim, SIM_DEF); dash.resetParams(); dash.setParams({ cmin: null, cmax: null, ymin: null, ymax: null }); });
 
   // ---------- KPIs + takeaway ----------
+  const KDEF = {
+    k1: 'Sum of the issue size of every live bond (not yet matured; the perpetual AT1 included), as published by grenke, converted to EUR at the ECB reference rate. This is the original issue amount, not a verified outstanding balance.',
+    k2: 'Issued nominal of live bonds whose final maturity falls between today ({today}) and 12 months from today. The perpetual AT1 is excluded.',
+    k3: 'Issued nominal of live bonds whose final maturity falls between today ({today}) and 24 months from today.',
+    k4: 'Issued nominal of live bonds maturing within 5 years of today; the sub-line shows the 3-year figure. Share = against all live issued nominal.',
+    k5: 'Contractual coupon rates weighted by EUR issued nominal. This is the rate written in the bonds, not the all-in cost of funding (issue price, fees and hedging are excluded).',
+    k6: 'Issued nominal × coupon rate, summed over live bonds, in EUR. All bonds in scope are fixed-rate, so this is the yearly coupon amount whatever the payment frequency. It is not grenke’s total funding cost: deposits, ABS, bank lines and other sources are outside this data. The AT1 coupon is discretionary.',
+    k7: 'Years to final maturity, weighted by EUR issued nominal, over live dated bonds. The perpetual AT1 is excluded.',
+  };
+  document.querySelectorAll('.gb-kpi[data-k]').forEach((k) => {
+    const lab = k.querySelector('.gb-klabel');
+    const icon = k.querySelector('.gb-i');
+    const text = () => KDEF[k.dataset.k].replace('{today}', fmtDate(new Date()));
+    lab.addEventListener('mousemove', (e) => setTipText(e, lab.textContent.replace(/i$/, ''), text()));
+    lab.addEventListener('mouseleave', hideTip);
+    icon.addEventListener('focus', () => { const r = icon.getBoundingClientRect(); setTipText({ clientX: r.left, clientY: r.bottom }, lab.textContent.replace(/i$/, ''), text()); });
+    icon.addEventListener('blur', hideTip);
+  });
+  const pct0 = (v) => (isFinite(v) ? d3.format('.0%')(v) : '—');
+  function dueWithin(live, months) {
+    const now = Date.now(), lim = +d3.utcMonth.offset(new Date(now), months);
+    return live.filter((r) => r.maturity && +r.maturity >= now && +r.maturity <= lim);
+  }
   function drawKpis(rows, all, p) {
-    const tot = d3.sum(rows, (r) => r.eur);
-    const set = (id, v, s) => { const e = $('#' + id); e.classList.remove('dash-skeleton'); e.textContent = v; if (s != null) $('#' + id + 's').textContent = s; };
-    const wavg = (arr, f) => { const w = d3.sum(arr, (r) => r.eur); return w ? d3.sum(arr, (r) => r.eur * f(r)) / w : null; };
-    const ccys = new Set(rows.map((r) => r.currency)).size;
-    set('k1', fmtEUR(tot), `${rows.length} bond${rows.length === 1 ? '' : 's'} · ${ccys} currenc${ccys === 1 ? 'y' : 'ies'}`);
-    const cp = wavg(rows, (r) => r.coupon);
-    const ext = d3.extent(rows, (r) => r.coupon);
-    set('k2', fmtPct2(cp), rows.length ? `Range ${fmtCpn(ext[0])} – ${fmtCpn(ext[1])}` : '');
-    const dated = rows.filter((r) => r.left != null && r.status !== 'Matured');
-    set('k3', fmtYrs(wavg(dated, (r) => r.left)), rows.some((r) => r.status === 'Perpetual') ? 'Excludes the perpetual AT1' : 'Remaining life, nominal-weighted');
-    const cost = d3.sum(rows.filter((r) => r.status !== 'Matured'), (r) => r.cost);
-    set('k4', fmtEUR(cost), cost ? `≈ ${fmtEUR(cost / 12)} a month` : '');
-    const esgAmt = d3.sum(rows.filter((r) => r.esg !== 'Conventional'), (r) => r.eur);
-    const g = d3.sum(rows.filter((r) => r.esg === 'Green'), (r) => r.eur);
-    const s = d3.sum(rows.filter((r) => r.esg === 'Social'), (r) => r.eur);
-    set('k5', tot ? d3.format('.1%')(esgAmt / tot) : '—', `Green ${fmtEUR(g)} · Social ${fmtEUR(s)}`);
     const now = Date.now();
-    const next = rows.filter((r) => r.maturity && +r.maturity >= now).sort((a, b) => a.maturity - b.maturity)[0];
-    if (next) {
-      const days = Math.ceil((next.maturity - now) / DAY);
-      set('k6', `${fmtInt(days)} days`, `${fmtDate(next.maturity)} · ${fmtLocal(next.currency, next.amount)} ${fmtCpn(next.coupon)}`);
-    } else set('k6', '—', 'Nothing due in this selection');
+    const live = rows.filter((r) => r.status !== 'Matured');
+    const base = p.status === 'matured' ? rows : live;
+    const tot = d3.sum(base, (r) => r.eur);
+    const liveTot = d3.sum(live, (r) => r.eur);
+    const set = (id, v, sub) => { const e = $('#' + id); e.classList.remove('dash-skeleton'); e.textContent = v; if (sub != null) $('#' + id + 's').textContent = sub; };
+    const wavg = (arr, f) => { const w = d3.sum(arr, (r) => r.eur); return w ? d3.sum(arr, (r) => r.eur * f(r)) / w : null; };
+    const sum = (a) => d3.sum(a, (r) => r.eur);
+    const ccys = new Set(base.map((r) => r.currency)).size;
+    const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+    set('k1', fmtEUR(tot), `${plural(base.length, 'bond')} · ${ccys} currenc${ccys === 1 ? 'y' : 'ies'}`);
+    const d12 = dueWithin(live, 12), d24 = dueWithin(live, 24), d36 = dueWithin(live, 36), d60 = dueWithin(live, 60);
+    const next = live.filter((r) => r.maturity && +r.maturity >= now).sort((a, b) => a.maturity - b.maturity)[0];
+    set('k2', fmtEUR(sum(d12)), next ? `${plural(d12.length, 'bond')} · next ${fmtDate(next.maturity)}` : 'Nothing due');
+    set('k3', fmtEUR(sum(d24)), `${plural(d24.length, 'bond')} · ${pct0(sum(d24) / liveTot)} of live`);
+    set('k4', fmtEUR(sum(d60)), `${pct0(sum(d60) / liveTot)} of live · ≤ 3 yrs ${fmtEUR(sum(d36))}`);
+    const cp = wavg(base, (r) => r.coupon);
+    const ext = d3.extent(base, (r) => r.coupon);
+    set('k5', fmtPct2(cp), base.length ? `Range ${fmtCpn(ext[0])} – ${fmtCpn(ext[1])}` : '');
+    const cost = d3.sum(live, (r) => r.cost);
+    set('k6', fmtEUR(cost), cost ? `≈ ${fmtEUR(cost / 12)} a month · fixed rates` : '');
+    const dated = live.filter((r) => r.left != null);
+    set('k7', fmtYrs(wavg(dated, (r) => r.left)), live.some((r) => r.status === 'Perpetual') ? 'Excludes the perpetual AT1' : 'To final maturity');
 
-    // takeaway (uses live book for the headline, independent of year filter)
     const take = $('#gb-take');
     take.classList.remove('dash-skeleton');
     take.replaceChildren();
-    if (!rows.length) { take.textContent = 'No bonds match these filters.'; return; }
-    const byYear = d3.rollups(rows.filter((r) => r.maturity), (v) => d3.sum(v, (r) => r.eur), (r) => r.year).sort((a, b) => b[1] - a[1]);
-    const b = (t) => { const e = document.createElement('b'); e.textContent = t; return e; };
-    const txt = (t) => document.createTextNode(t);
-    take.append(b(fmtEUR(tot)), txt(` across ${rows.length} bonds in ${ccys} currencies, at a weighted coupon of `), b(fmtPct2(cp)), txt('.'));
-    if (byYear.length) {
-      take.append(txt(' The heaviest maturity year is '), b(byYear[0][0]), txt(` (${fmtEUR(byYear[0][1])}, ${d3.format('.0%')(byYear[0][1] / tot)} of this selection)`));
-      if (next) take.append(txt(', and the next redemption is due in '), b(`${fmtInt(Math.ceil((next.maturity - now) / DAY))} days`), txt('.'));
-      else take.append(txt('.'));
+    if (!live.length) { take.textContent = p.status === 'matured' ? `${plural(base.length, 'matured bond')} in this selection, ${fmtEUR(tot)} issued nominal.` : 'No live bonds match these filters.'; return; }
+    const byYear = d3.rollups(live.filter((r) => r.maturity), (v) => d3.sum(v, (r) => r.eur), (r) => r.year).sort((a, b) => b[1] - a[1]);
+    const bt = (t) => { const e = document.createElement('b'); e.textContent = t; return e; };
+    const tx = (t) => document.createTextNode(t);
+    take.append(bt(fmtEUR(liveTot)), tx(` of issued nominal across ${plural(live.length, 'live bond')} in ${new Set(live.map((r) => r.currency)).size} currencies, at a weighted coupon of `), bt(fmtPct2(wavg(live, (r) => r.coupon))), tx('. '));
+    take.append(bt(fmtEUR(sum(d24))), tx(` (${pct0(sum(d24) / liveTot)}) falls due within 24 months`));
+    if (byYear.length) take.append(tx('; the heaviest maturity year is '), bt(byYear[0][0]), tx(` (${fmtEUR(byYear[0][1])}).`));
+    else take.append(tx('.'));
+  }
+
+  // ---------- reference new-issue level (data-derived) ----------
+  function refLevel(all) {
+    const now = Date.now(), yearAgo = +d3.utcYear.offset(new Date(now), -1);
+    const eurSen = all.filter((r) => r.currency === 'EUR' && r.instrument === 'Senior bond');
+    let set = eurSen.filter((r) => +r.issue >= yearAgo && +r.issue <= now);
+    let label = 'EUR senior bonds issued in the last 12 months';
+    if (!set.length) { set = [...eurSen].sort((a, b) => b.issue - a.issue).slice(0, 2); label = 'the two most recent EUR senior issues'; }
+    if (!set.length) return null;
+    const w = d3.sum(set, (r) => r.eur);
+    return { rate: d3.sum(set, (r) => r.eur * r.coupon) / w, desc: `${label}: ${set.map((r) => `${fmtCpn(r.coupon)} (${d3.utcFormat('%b %Y')(r.issue)}, ${fmtLocal(r.currency, r.amount)})`).join(', ')}` };
+  }
+  const fxDate = () => { const f = dash.data('fx'); return f.status === 'ok' && f.data[0] ? f.data[0].rate_date : '—'; };
+
+  // ---------- key findings (deterministic rules) ----------
+  function buildFindings(rows, all) {
+    const out = [];
+    const now = Date.now();
+    const live = rows.filter((r) => r.status !== 'Matured');
+    const tot = d3.sum(live, (r) => r.eur);
+    if (!live.length || !tot) return out;
+    const src = `grenke Issued Bonds page (terms); ECB reference rates of ${fxDate()} (FX)`;
+    const dated = live.filter((r) => r.maturity && +r.maturity >= now);
+    const sum = (a) => d3.sum(a, (r) => r.eur);
+    const today = fmtDate(new Date(now));
+
+    const byY = d3.rollups(dated, (v) => ({ eur: sum(v), n: v.length }), (r) => r.year).sort((a, b) => b[1].eur - a[1].eur);
+    if (byY.length) {
+      const [y, v] = byY[0];
+      const avg = d3.mean(byY, (d) => d[1].eur);
+      const yrs = byY.map((d) => d[0]).sort();
+      out.push({ tag: 'Maturities', t: `${y} is the heaviest maturity year`,
+        e: `${fmtEUR(v.eur)} across ${v.n} bond${v.n === 1 ? '' : 's'}: ${pct0(v.eur / tot)} of live issued nominal` + (byY.length > 1 ? ` and ${d3.format('.1f')(v.eur / avg)}× the average of the ${byY.length} maturity years (${fmtEUR(avg)}).` : ' — the only maturity year in this selection.'),
+        period: `Maturities ${yrs[0]}–${yrs[yrs.length - 1]}`, src,
+        lim: 'Issued nominal, not verified outstanding; the perpetual AT1 has no maturity and is excluded.' });
     }
+    const d12 = sum(dueWithin(live, 12)), d24 = sum(dueWithin(live, 24)), d48 = sum(dueWithin(live, 48));
+    out.push({ tag: 'Refinancing need', t: d24 > 0 ? `${fmtEUR(d24)} falls due in the next 24 months` : 'Nothing falls due in the next 24 months',
+      e: `${fmtEUR(d12)} within 12 months and ${fmtEUR(d24 - d12)} in months 13–24, against ${fmtEUR(d48 - d24)} in months 25–48. That is ${pct0(d24 / tot)} of live issued nominal.`,
+      period: `${today} to ${fmtDate(d3.utcMonth.offset(new Date(now), 48))}`, src,
+      lim: 'Bond maturities only; deposits, ABS and bank lines are outside this data.' });
+
+    const REFL = refLevel(all);
+    const due24 = dueWithin(live, 24);
+    if (REFL && due24.length) {
+      const amt = sum(due24), cur = d3.sum(due24, (r) => (r.eur * r.coupon) / 100), nw = (amt * REFL.rate) / 100, dlt = nw - cur;
+      out.push({ tag: 'Repricing', t: `Refinancing the next 24 months’ maturities at recent issue levels would ${dlt < 0 ? 'lower' : 'raise'} annual coupons by about ${fmtEUR(Math.abs(dlt))}`,
+        e: `They pay ${fmtEUR(cur)} a year today on ${fmtEUR(amt)} (average ${fmtPct2((cur / amt) * 100)}). At ${fmtPct2(REFL.rate)} the same amount would cost ${fmtEUR(nw)}.`,
+        period: `Maturities ${today} to ${fmtDate(d3.utcMonth.offset(new Date(now), 24))}`, src,
+        lim: `Reference level = nominal-weighted coupon of ${REFL.desc}. Assumes 100% refinanced in EUR, no fees or spread changes. Hypothetical, not a forecast.` });
+    }
+    const eurSen = live.filter((r) => r.currency === 'EUR' && r.instrument === 'Senior bond');
+    if (eurSen.length >= 3) {
+      const hi = d3.greatest(eurSen, (r) => r.coupon), lo = d3.least(eurSen, (r) => r.coupon);
+      const old = eurSen.filter((r) => +r.issueYear <= 2021), recent = eurSen.filter((r) => +r.issueYear >= 2023);
+      const w = (a) => (sum(a) ? d3.sum(a, (r) => r.eur * r.coupon) / sum(a) : null);
+      out.push({ tag: 'Pricing', t: `EUR senior coupons range from ${fmtCpn(lo.coupon)} to ${fmtCpn(hi.coupon)}, driven by when each bond was issued`,
+        e: `Highest: ${hi.isin}, ${fmtCpn(hi.coupon)} issued ${d3.utcFormat('%b %Y')(hi.issue)}. Lowest: ${lo.isin}, ${fmtCpn(lo.coupon)} issued ${d3.utcFormat('%b %Y')(lo.issue)}.` +
+          (old.length && recent.length ? ` Issues up to 2021 average ${fmtPct2(w(old))} (${fmtEUR(sum(old))}); issues from 2023 average ${fmtPct2(w(recent))} (${fmtEUR(sum(recent))}).` : ''),
+        period: `Live EUR senior bonds, issued ${d3.min(eurSen, (r) => r.issueYear)}–${d3.max(eurSen, (r) => r.issueYear)}`, src,
+        lim: 'Comparison across issue dates and tenors, not a like-for-like credit spread analysis.' });
+    }
+    const byC = d3.rollups(live, (v) => ({ eur: sum(v), local: d3.sum(v, (r) => r.amount), n: v.length }), (r) => r.currency).sort((a, b) => b[1].eur - a[1].eur);
+    const eur = byC.find((d) => d[0] === 'EUR');
+    const non = byC.filter((d) => d[0] !== 'EUR');
+    if (non.length) {
+      out.push({ tag: 'Currency', t: `${pct0((eur ? eur[1].eur : 0) / tot)} of issued nominal is in EUR`,
+        e: `${non.length} other currenc${non.length === 1 ? 'y' : 'ies'} make up ${fmtEUR(sum(live.filter((r) => r.currency !== 'EUR')))} (${pct0(1 - (eur ? eur[1].eur : 0) / tot)}): ${non.map(([c, v]) => `${c} ${d3.format(',.2~f')(v.local)}m`).join(', ')}.`,
+        period: 'Live bonds', src,
+        lim: `Converted at ECB reference rates of ${fxDate()}; currency hedges are unknown and not reflected.` });
+    }
+    const sorted = [...live].sort((a, b) => b.eur - a.eur);
+    const top3 = sorted.slice(0, 3);
+    const hhi = d3.sum(live, (r) => (r.eur / tot) ** 2);
+    out.push({ tag: 'Concentration', t: `The three largest bonds hold ${pct0(sum(top3) / tot)} of issued nominal`,
+      e: `${top3.map((r) => `${fmtLocal(r.currency, r.amount)} ${fmtCpn(r.coupon)} ${r.maturity ? d3.utcFormat('%Y')(r.maturity) : 'perp.'}`).join('; ')}. Effective number of bonds: ${d3.format('.1f')(1 / hhi)} of ${live.length}.`,
+      period: 'Live bonds', src,
+      lim: 'Effective number = 1 ÷ Herfindahl index of nominal shares. Measures concentration among bonds only, not across grenke’s funding sources.' });
+    const perp = live.filter((r) => r.status === 'Perpetual');
+    if (perp.length) {
+      const a = perp[0];
+      out.push({ tag: 'Instrument', t: 'The AT1 bond has no maturity and a discretionary coupon',
+        e: `${fmtLocal(a.currency, a.amount)} at ${fmtCpn(a.coupon)}, issued ${fmtDate(a.issue)} (${a.isin}). It is included in nominal and coupon totals and excluded from maturity and average-life figures.`,
+        period: 'Since issue', src: `${src}; AT1 prospectus`,
+        lim: 'AT1 coupons can be cancelled by the issuer and the rate may reset at call dates; call dates are not modelled.' });
+    }
+    return out;
+  }
+  function drawFindings(elx, rows, all) {
+    elx.replaceChildren(); elx.classList.remove('dash-skeleton');
+    const list = buildFindings(rows, all);
+    if (!list.length) { elx.append(el('div', 'gb-fail', 'No live bonds in this selection')); return; }
+    for (const f of list) {
+      const c = el('article', 'gb-ins');
+      const dl = el('dl');
+      for (const [k, v] of [['Period', f.period], ['Source', f.src], ['Limits', f.lim]]) dl.append(el('dt', null, k), el('dd', null, v));
+      c.append(el('div', 'tag', f.tag), el('div', 't', f.t), el('div', 'e', f.e), dl);
+      elx.append(c);
+    }
+  }
+
+  // ---------- concentration & buckets ----------
+  function drawConc(elx, rows) {
+    elx.replaceChildren(); elx.classList.remove('dash-skeleton');
+    const now = Date.now();
+    const live = rows.filter((r) => r.status !== 'Matured');
+    const tot = d3.sum(live, (r) => r.eur);
+    if (!tot) { elx.append(el('div', 'gb-fail', 'No live bonds in this selection')); return; }
+    const sorted = [...live].sort((a, b) => b.eur - a.eur);
+    const left = el('div');
+    left.append(el('h3', 'gb-subt', 'Share of issued nominal in the largest bonds'));
+    for (const [label, n] of [['Largest bond', 1], ['Top 3', 3], ['Top 5', 5]]) {
+      const part = sorted.slice(0, n), sh = d3.sum(part, (r) => r.eur) / tot;
+      const row = el('div', 'gb-crow'), bar = el('div', 'gb-cbar'), fill = el('i');
+      fill.style.width = sh * 100 + '%'; fill.style.background = PAL[0];
+      bar.append(fill);
+      row.append(el('span', null, label), bar, el('span', 'v', d3.format('.1%')(sh)));
+      row.addEventListener('mousemove', (e) => setTip(e, label, part.map((r) => ({ label: `${r.isin}`, value: fmtEUR(r.eur) }))));
+      row.addEventListener('mouseleave', hideTip);
+      left.append(row);
+    }
+    const hhi = d3.sum(live, (r) => (r.eur / tot) ** 2);
+    const note = el('p', 'gb-cnote');
+    note.append('Effective number of bonds: ', el('b', null, d3.format('.1f')(1 / hhi)), ` of ${live.length}. This is 1 ÷ the Herfindahl index of nominal shares; it would equal ${live.length} if every bond were the same size.`);
+    left.append(note);
+
+    const right = el('div');
+    right.append(el('h3', 'gb-subt', 'Time to final maturity'));
+    const yrs = (r) => (+r.maturity - now) / (365.25 * 864e5);
+    const B = [
+      ['≤ 1 year', (r) => r.maturity && yrs(r) <= 1],
+      ['1–3 years', (r) => r.maturity && yrs(r) > 1 && yrs(r) <= 3],
+      ['3–5 years', (r) => r.maturity && yrs(r) > 3 && yrs(r) <= 5],
+      ['> 5 years', (r) => r.maturity && yrs(r) > 5],
+      ['Perpetual', (r) => !r.maturity],
+    ].map(([k, f], i) => { const a = live.filter(f); return { k, a, eur: d3.sum(a, (r) => r.eur), c: [PAL[3], PAL[2], PAL[0], PAL[1], PAL[5]][i] }; });
+    const stack = el('div', 'gb-stack');
+    for (const b of B) if (b.eur > 0) {
+      const seg = el('i'); seg.style.width = (b.eur / tot) * 100 + '%'; seg.style.background = b.c;
+      seg.addEventListener('mousemove', (e) => setTip(e, b.k, [{ color: b.c, label: 'Issued nominal', value: fmtEUR(b.eur) }, { label: 'Bonds', value: String(b.a.length) }]));
+      seg.addEventListener('mouseleave', hideTip);
+      stack.append(seg);
+    }
+    const list = el('div', 'gb-blist');
+    for (const b of B) {
+      const sw = el('i', 'gb-sw'); sw.style.background = b.c;
+      list.append(sw, el('span', null, b.k), el('span', null, fmtEUR(b.eur)), el('span', 'm', d3.format('.0%')(b.eur / tot)), el('span', 'm', `${b.a.length} bond${b.a.length === 1 ? '' : 's'}`));
+    }
+    right.append(stack, list, el('p', 'gb-cnote', 'Measured from today to each final maturity. Short-dated buckets show where refinancing or repayment is needed first.'));
+    elx.append(left, right);
+  }
+
+  // ---------- maturity wall summary + drill-down ----------
+  function drawWallText(rows, p) {
+    const sumEl = $('#wall-sum'), drill = $('#wall-drill');
+    sumEl.classList.remove('dash-skeleton'); drill.classList.remove('dash-skeleton');
+    const now = Date.now();
+    const live = rows.filter((r) => r.status !== 'Matured');
+    const tot = d3.sum(live, (r) => r.eur);
+    const dated = live.filter((r) => r.maturity && +r.maturity >= now);
+    const byY = d3.rollups(dated, (v) => d3.sum(v, (r) => r.eur), (r) => r.year).sort((a, b) => b[1] - a[1]);
+    sumEl.textContent = byY.length && tot
+      ? `Refinancing needs peak in ${byY[0][0]}: ${fmtEUR(byY[0][1])}, ${pct0(byY[0][1] / tot)} of live issued nominal. ${pct0(d3.sum(dueWithin(live, 36), (r) => r.eur) / tot)} falls due within three years. Bond maturities only — other funding sources are not in this data.`
+      : 'No dated live bonds in this selection.';
+    drill.replaceChildren();
+    if (!p.year) return;
+    const list = rows.filter((r) => r.year === p.year).sort((a, b) => (a.maturity ? +a.maturity : Infinity) - (b.maturity ? +b.maturity : Infinity));
+    drill.append(el('div', 'gb-drillh', `${p.year === 'Perp.' ? 'Perpetual' : 'Maturing in ' + p.year}: ${list.length} bond${list.length === 1 ? '' : 's'} · ${fmtEUR(d3.sum(list, (r) => r.eur))}`));
+    const t = el('table', 'gb-mini'), th = el('tr');
+    for (const [h, c] of [['ISIN'], ['Issuer'], ['Issued', 'num'], ['EUR eq.', 'num'], ['Coupon', 'num'], ['Maturity']]) th.append(el('th', c, h));
+    const tb = el('tbody');
+    for (const r of list) {
+      const tr = el('tr', 'click');
+      tr.append(el('td', 'mono', r.isin), el('td', null, r.issuer_short), el('td', 'num', fmtLocal(r.currency, r.amount)), el('td', 'num', fmtEUR(r.eur)), el('td', 'num', fmtCpn(r.coupon)), el('td', null, fmtDate(r.maturity)));
+      tr.addEventListener('click', () => dash.setParams({ isin: r.isin }));
+      tb.append(tr);
+    }
+    const thead = el('thead'); thead.append(th);
+    t.append(thead, tb);
+    drill.append(t);
+  }
+
+  // ---------- methodology: live audit ----------
+  function drawMethod(all) {
+    const box = $('#m-audit');
+    box.replaceChildren(); box.classList.remove('dash-skeleton');
+    const fx = dash.data('fx');
+    const fxCcy = new Set(fx.status === 'ok' ? fx.data.map((f) => f.currency) : []);
+    const isins = all.map((r) => r.isin);
+    const dup = isins.length - new Set(isins).size;
+    const bad = all.filter((r) => !isFinite(r.amount) || !isFinite(r.coupon) || isNaN(+r.issue) || !r.currency);
+    const noFx = [...new Set(all.map((r) => r.currency))].filter((c) => !fxCcy.has(c));
+    const linked = all.filter((r) => r.doc_url).length;
+    const st = (s) => all.filter((r) => r.status === s).length;
+    const row = (k, v, cls) => box.append(el('dt', null, k), el('dd', cls || null, v));
+    row('Bonds on grenke page', String(all.length));
+    row('Duplicate ISINs', dup ? String(dup) : 'None', dup ? 'warn' : 'ok');
+    row('Missing amount, coupon or date', bad.length ? bad.map((r) => r.isin).join(', ') : 'None', bad.length ? 'warn' : 'ok');
+    row('Status', `${st('Outstanding')} outstanding · ${st('Perpetual')} perpetual · ${st('Matured')} matured (kept for history)`);
+    row('Coupon type', `Fixed rate shown for all ${all.length} bonds`);
+    row('FX coverage', noFx.length ? `No ECB rate for ${noFx.join(', ')}` : `ECB rate for every currency (${fxDate()})`, noFx.length ? 'warn' : 'ok');
+    row('Official document linked', `${linked} of ${all.length} bonds${linked < all.length ? ' — older issues have no Final Terms on the page' : ''}`, linked < all.length ? 'warn' : 'ok');
+    row('Nominal basis', 'Issue size as published; outstanding after buybacks not available', 'warn');
+    $('#m-fxdate').textContent = fxDate();
+    const R = refLevel(all);
+    if (R) $('#m-base').textContent = `Base new-issue coupon ${fmtPct2(R.rate)}: nominal-weighted coupon of ${R.desc}.`;
   }
 
   // ---------- maturity wall ----------
@@ -742,7 +1099,10 @@ dash.calc('bonds_eur', {
     });
     svg.append('g').selectAll('text').data(table.filter((d) => d.total > 0)).join('text').attr('class', 'val-l')
       .attr('x', (d) => x(d.year) + x.bandwidth() / 2).attr('y', (d) => y(d.total) - 6).attr('text-anchor', 'middle')
-      .attr('opacity', (d) => dim(d.year)).text((d) => fmtAxisEUR(Math.round(d.total)));
+      .attr('opacity', (d) => dim(d.year)).text((d) => `${fmtAxisEUR(Math.round(d.total))} · ${d.n}`);
+    const peak = d3.greatest(table.filter((d) => d.year !== 'Perp.'), (d) => d.total);
+    if (peak && peak.total > 0) svg.append('rect').attr('x', x(peak.year) + off - 3).attr('width', bw + 6).attr('y', y(peak.total) - 3).attr('height', y(0) - y(peak.total) + 3)
+      .attr('rx', 3).attr('fill', 'none').attr('stroke', PAL[2]).attr('stroke-width', 1.25).attr('stroke-dasharray', '3 2').attr('pointer-events', 'none');
     svg.append('line').attr('class', 'axis-l').attr('x1', m.l).attr('x2', w - m.r).attr('y1', y(0)).attr('y2', y(0));
     const step = Math.ceil(years.length / Math.max(1, Math.floor((w - m.l) / 44)));
     svg.append('g').selectAll('text').data(years.filter((_, i) => i % step === 0)).join('text').attr('class', 'tick-l')
@@ -885,12 +1245,18 @@ dash.calc('bonds_eur', {
     life.append(track, ll);
     const facts = el('dl', 'gb-facts');
     const fact = (k, v) => { const f = el('div', 'gb-fact'); f.append(el('dt', null, k), el('dd', null, v)); facts.append(f); };
-    fact('EUR equivalent', fmtEUR(bnd.eur));
-    fact('Coupon per year', fmtEUR(bnd.cost));
+    fact('EUR equivalent (issued)', fmtEUR(bnd.eur));
+    fact('Contractual coupon / yr', fmtEUR(bnd.cost));
     fact('Original tenor', bnd.tenor == null ? 'Perpetual' : fmtYrs(bnd.tenor));
     fact('Share of selection', d3.format('.1%')(bnd.eur / (d3.sum(rows, (r) => r.eur) || bnd.eur)));
     fact('Programme', bnd.programme);
-    fact('Currency', bnd.currency);
+    {
+      const f = el('div', 'gb-fact'), dd = el('dd');
+      if (bnd.doc_url) { const a = document.createElement('a'); a.href = bnd.doc_url; a.target = '_blank'; a.rel = 'noopener'; a.className = 'gb-doc'; a.textContent = bnd.doc_type + ' ↗'; dd.append(a); }
+      else dd.textContent = 'Not linked on grenke page';
+      f.append(el('dt', null, 'Documentation'), dd);
+      facts.append(f);
+    }
     const nav = el('div', 'gb-dnav');
     const idx = order.findIndex((r) => r.isin === bnd.isin);
     const prev = el('button', 'gb-btn', '← Previous'); prev.type = 'button';
@@ -994,7 +1360,7 @@ dash.calc('bonds_eur', {
   // ---------- coupon cost ----------
   function drawCost(el, rows, cs) {
     el.replaceChildren(); el.classList.remove('dash-skeleton');
-    $('#cost-note').textContent = `EUR per year on bonds not yet redeemed, by ${cs.dim.label.toLowerCase()}`;
+    $('#cost-note').textContent = `Issued nominal × coupon, EUR per year, live bonds by ${cs.dim.label.toLowerCase()} · not total funding cost`;
     const live = rows.filter((r) => r.status !== 'Matured');
     const data = d3.rollups(live, (v) => ({ cost: d3.sum(v, (r) => r.cost), eur: d3.sum(v, (r) => r.eur) }), cs.dim.key).sort((a, b) => b[1].cost - a[1].cost);
     if (!data.length) return;
@@ -1021,7 +1387,7 @@ dash.calc('bonds_eur', {
   const SORTERS = {
     isin: (r) => r.isin, issuer_short: (r) => r.issuer_short, currency: (r) => r.currency, amount: (r) => r.amount, eur: (r) => r.eur,
     coupon: (r) => r.coupon, issue: (r) => +r.issue, maturity: (r) => (r.maturity ? +r.maturity : Infinity), left: (r) => (r.left == null ? Infinity : r.left),
-    cost: (r) => r.cost, esg: (r) => r.esg, status: (r) => r.status,
+    cost: (r) => r.cost, esg: (r) => r.esg, status: (r) => r.status, docs: (r) => r.doc_type,
   };
   document.querySelectorAll('#t-bonds th').forEach((th) => {
     th.querySelector('button').addEventListener('click', () => {
@@ -1033,9 +1399,9 @@ dash.calc('bonds_eur', {
   $('#t-body').addEventListener('click', (e) => { const tr = e.target.closest('tr[data-key]'); if (tr) toggle('isin', tr.dataset.key); });
   let lastRows = [];
   $('#t-csv').addEventListener('click', async () => {
-    const head = ['isin', 'issuer', 'currency', 'amount_m', 'eur_eq_m', 'coupon_pct', 'issue_date', 'maturity_date', 'years_left', 'coupon_per_year_eur_m', 'esg', 'status'];
+    const head = ['isin', 'issuer', 'currency', 'issued_amount_m', 'eur_eq_m', 'coupon_pct', 'issue_date', 'maturity_date', 'years_left', 'contractual_coupon_per_year_eur_m', 'esg', 'status', 'document'];
     const iso = d3.utcFormat('%Y-%m-%d');
-    const lines = [head.join(',')].concat(lastRows.map((r) => [r.isin, '"' + r.issuer + '"', r.currency, r.amount, r.eur, r.coupon, iso(r.issue), r.maturity ? iso(r.maturity) : '', r.left ?? '', r.cost, r.esg, r.status].join(',')));
+    const lines = [head.join(',')].concat(lastRows.map((r) => [r.isin, '"' + r.issuer + '"', r.currency, r.amount, r.eur, r.coupon, iso(r.issue), r.maturity ? iso(r.maturity) : '', r.left ?? '', r.cost, r.esg, r.status, r.doc_url].join(',')));
     try { await navigator.clipboard.writeText(lines.join('\n')); $('#t-csv').textContent = 'Copied ✓'; } catch (err) { $('#t-csv').textContent = 'Copy blocked'; }
     setTimeout(() => ($('#t-csv').textContent = 'Copy as CSV'), 1600);
   });
@@ -1068,6 +1434,10 @@ dash.calc('bonds_eur', {
       td(r.left == null ? '—' : d3.format('.1f')(r.left), 'num');
       td(d3.format(',.2f')(r.cost), 'num hide-narrow');
       td(r.esg === 'Conventional' ? '—' : r.esg);
+      const dc = document.createElement('td'); dc.className = 'hide-narrow';
+      if (r.doc_url) { const a = document.createElement('a'); a.href = r.doc_url; a.target = '_blank'; a.rel = 'noopener'; a.className = 'gb-doc'; a.textContent = r.doc_type; a.addEventListener('click', (e) => e.stopPropagation()); dc.append(a); }
+      else { dc.textContent = r.doc_type; dc.className += ' muted'; }
+      tr.append(dc);
       td(r.status);
       return tr;
     }));
@@ -1115,11 +1485,14 @@ dash.calc('bonds_eur', {
   }
 
   // ---------- what-if simulator ----------
-  const SIM_DEF = { cpn: 4.5, ten: 5, fx: 0, yr: 2030 };
+  const SIM_DEF = { cpn: 4.5, share: 100, ten: 5, fx: 0, yr: 2030 };
   const sim = { ...SIM_DEF };
-  const PRESETS = [['Cheaper funding · 3.5%', { cpn: 3.5 }], ['Like recent issues · 4.5%', { cpn: 4.5 }], ['Stress · 7%', { cpn: 7 }], ['Reset', SIM_DEF]];
+  let PRESETS = [];
+  let REF = null;
+  let simInit = false;
   const SL = [
-    { k: 'cpn', fmt: (v) => d3.format('.3~f')(v) + '%' },
+    { k: 'cpn', fmt: (v) => d3.format('.2f')(v) + '%' },
+    { k: 'share', fmt: (v) => v + '%' },
     { k: 'ten', fmt: (v) => v + ' yrs' },
     { k: 'fx', fmt: (v) => (v > 0 ? 'EUR +' : v < 0 ? 'EUR −' : '±') + Math.abs(v) + '%' },
     { k: 'yr', fmt: (v) => String(v) },
@@ -1130,12 +1503,22 @@ dash.calc('bonds_eur', {
     const inp = $('#s-' + sl.k);
     inp.addEventListener('input', () => { sim[sl.k] = +inp.value; drawSim(); });
   });
-  $('#s-presets').append(...PRESETS.map(([label, v]) => {
-    const b = document.createElement('button');
-    b.type = 'button'; b.className = 'gb-chip'; b.textContent = label;
-    b.addEventListener('click', () => { Object.assign(sim, v); drawSim(); });
-    return b;
-  }));
+  function buildPresets() {
+    const b = Math.round(REF.rate / 0.05) * 0.05;
+    PRESETS = [['Favourable', { cpn: Math.max(2, b - 1) }], ['Base · recent issues', { cpn: b }], ['Adverse', { cpn: Math.min(9, b + 2) }]];
+    const box = $('#s-presets');
+    box.replaceChildren();
+    for (const [label, v] of PRESETS) {
+      const btn = document.createElement('button');
+      btn.type = 'button'; btn.className = 'gb-chip'; btn.dataset.cpn = v.cpn; btn.textContent = `${label} · ${d3.format('.2f')(v.cpn)}%`;
+      btn.addEventListener('click', () => { Object.assign(sim, v); drawSim(); });
+      box.append(btn);
+    }
+    const r = document.createElement('button');
+    r.type = 'button'; r.className = 'gb-chip'; r.textContent = 'Reset';
+    r.addEventListener('click', () => { Object.assign(sim, SIM_DEF); drawSim(); });
+    box.append(r);
+  }
 
   function simModel(rows) {
     const y0 = new Date().getUTCFullYear();
@@ -1152,7 +1535,7 @@ dash.calc('bonds_eur', {
       for (const r of live) {
         const e = r.eur * fxf(r), f = after(r, y);
         base += (e * r.coupon) / 100;
-        scen += (e * (r.coupon * (1 - f) + sim.cpn * f)) / 100;
+        scen += (e * (r.coupon * (1 - f) + sim.cpn * (sim.share / 100) * f)) / 100;
       }
       return { y, base, scen, delta: scen - base };
     });
@@ -1160,7 +1543,7 @@ dash.calc('bonds_eur', {
     const add = (y, k, v) => { const o = prof.get(y) || { y, today: 0, after: 0 }; o[k] += v; prof.set(y, o); };
     for (const r of live) if (r.maturity) {
       const e = r.eur * fxf(r), my = r.maturity.getUTCFullYear();
-      add(my, 'today', e); add(my + sim.ten, 'after', e);
+      add(my, 'today', e); if (sim.share > 0) add(my + sim.ten, 'after', (e * sim.share) / 100);
     }
     const ks = [...prof.keys()];
     const profile = ks.length ? d3.range(d3.min(ks), d3.max(ks) + 1).map((y) => prof.get(y) || { y, today: 0, after: 0 }) : [];
@@ -1168,7 +1551,7 @@ dash.calc('bonds_eur', {
       y0, series, profile, live,
       nominal: d3.sum(live, (r) => r.eur * fxf(r)),
       fxEffect: d3.sum(live, (r) => r.eur * (fxf(r) - 1)),
-      due: live.filter((r) => r.maturity && r.maturity.getUTCFullYear() <= sim.yr),
+      due: live.filter((r) => r.maturity && +r.maturity >= Date.now() && r.maturity.getUTCFullYear() <= sim.yr),
       fxf,
     };
   }
@@ -1182,6 +1565,15 @@ dash.calc('bonds_eur', {
   }
   const tone = (d) => (d > 0.05 ? 'up' : d < -0.05 ? 'down' : '');
 
+  function runScenario(over) {
+    const saved = { ...sim };
+    Object.assign(sim, over);
+    const m = simModel(simRows);
+    const at = m.series.find((x) => x.y === sim.yr) || m.series[m.series.length - 1];
+    const cum = d3.sum(m.series.filter((x) => x.y > m.y0 && x.y <= sim.yr), (x) => x.delta);
+    Object.assign(sim, saved);
+    return { m, at, cum };
+  }
   function drawSim() {
     SL.forEach((sl) => {
       const inp = $('#s-' + sl.k);
@@ -1189,24 +1581,41 @@ dash.calc('bonds_eur', {
       paintRange(inp);
       $('#s-' + sl.k + '-v').textContent = sl.fmt(sim[sl.k]);
     });
-    $('#s-fx-note').textContent = sim.fx === 0 ? 'FX at the ECB reference rates' : sim.fx > 0 ? 'EUR stronger: foreign-currency debt shrinks in EUR terms' : 'EUR weaker: foreign-currency debt grows in EUR terms';
-    document.querySelectorAll('#s-presets .gb-chip').forEach((b, i) => b.setAttribute('aria-pressed', i < 3 && PRESETS[i][1].cpn === sim.cpn ? 'true' : 'false'));
-    const out = $('#s-out'), cEl = $('#s-cost'), wEl = $('#s-wall');
-    if (!simRows) { failOrWait([out, cEl, wEl]); return; }
-    [out, cEl, wEl].forEach((e) => e.classList.remove('dash-skeleton'));
-    const m = simModel(simRows);
-    const at = m.series.find((x) => x.y === sim.yr) || m.series[m.series.length - 1];
-    const now0 = m.series[0];
-    const cum = d3.sum(m.series.filter((x) => x.y > m.y0 && x.y <= sim.yr), (x) => x.delta);
-    const dueAmt = d3.sum(m.due, (r) => r.eur * m.fxf(r));
+    document.querySelectorAll('#s-presets .gb-chip[data-cpn]').forEach((b) => b.setAttribute('aria-pressed', Math.abs(+b.dataset.cpn - sim.cpn) < 1e-9 ? 'true' : 'false'));
+    const out = $('#s-out'), cmp = $('#s-compare'), cEl = $('#s-cost'), wEl = $('#s-wall');
+    if (!simRows) { failOrWait([out, cmp, cEl, wEl]); return; }
+    [out, cmp, cEl, wEl].forEach((e) => e.classList.remove('dash-skeleton'));
+    const { m, at, cum } = runScenario({});
+    $('#s-fx-note').textContent = sim.fx === 0 ? 'FX at the ECB reference rates' : `${sim.fx > 0 ? 'EUR stronger' : 'EUR weaker'}: non-EUR nominal ${signed(m.fxEffect)} in EUR terms`;
+    const aff = m.due;
+    const affAmt = d3.sum(aff, (r) => r.eur * m.fxf(r));
+    const refi = (affAmt * sim.share) / 100;
+    const curCost = d3.sum(aff, (r) => (r.eur * m.fxf(r) * r.coupon) / 100);
+    const newCost = (refi * sim.cpn) / 100;
     out.replaceChildren(
-      sbox(`Coupon cost in ${sim.yr}`, fmtEUR(at.scen), `${signed(at.delta)} vs. rolling at today's coupons`, tone(at.delta)),
-      sbox(`Extra interest ${m.y0 + 1}–${sim.yr}`, signed(cum), 'Cumulative, vs. today’s coupons', tone(cum)),
-      sbox(`Weighted coupon in ${sim.yr}`, m.nominal ? fmtPct2((at.scen / m.nominal) * 100) : '—', `Today ${m.nominal ? fmtPct2((now0.base / m.nominal) * 100) : '—'}`, tone(at.delta)),
-      sbox(`To refinance by end-${sim.yr}`, fmtEUR(dueAmt), `${m.due.length} bond${m.due.length === 1 ? '' : 's'} · ${m.nominal ? d3.format('.0%')(dueAmt / m.nominal) : '—'} of nominal`),
-      sbox('Nominal in scope', fmtEUR(m.nominal), `${m.live.length} live bonds at your FX`),
-      sbox('FX effect on nominal', signed(m.fxEffect), sim.fx === 0 ? 'Move the FX slider' : 'Non-EUR bonds, in EUR', tone(m.fxEffect)),
+      sbox(`Maturing by end-${sim.yr}`, fmtEUR(affAmt), `${aff.length} bond${aff.length === 1 ? '' : 's'} · ${m.nominal ? pct0(affAmt / m.nominal) : '—'} of live nominal`),
+      sbox('Refinanced', fmtEUR(refi), `${fmtEUR(affAmt - refi)} repaid from own resources`),
+      sbox('Coupon on that debt today', fmtEUR(curCost), affAmt ? `${fmtPct2((curCost / affAmt) * 100)} average, per year` : 'No maturities in range'),
+      sbox('Coupon on the new bonds', fmtEUR(newCost), `${fmtPct2(sim.cpn)} on ${fmtEUR(refi)}, per year`),
+      sbox(`Annual change in ${sim.yr}`, signed(at.delta), `Whole book ${fmtEUR(at.scen)} vs ${fmtEUR(at.base)}`, tone(at.delta)),
+      sbox(`Cumulative ${m.y0 + 1}–${sim.yr}`, signed(cum), 'Sum of the yearly changes', tone(cum)),
     );
+    cmp.replaceChildren();
+    const t = el('table', 'gb-mini'), thead = el('thead'), hr = el('tr');
+    for (const [h, c] of [['Scenario'], ['New coupon', 'num'], [`Coupons in ${sim.yr}`, 'num'], ['Change vs today', 'num'], [`Cumulative to ${sim.yr}`, 'num']]) hr.append(el('th', c, h));
+    thead.append(hr);
+    const tb = el('tbody');
+    const rowsC = PRESETS.map(([n, v]) => [n, v.cpn]).concat([['Your settings', sim.cpn]]);
+    for (const [n, c] of rowsC) {
+      const r = runScenario({ cpn: c });
+      const tr = el('tr', n === 'Your settings' ? 'mine' : 'click');
+      tr.append(el('td', null, n), el('td', 'num', fmtPct2(c)), el('td', 'num', fmtEUR(r.at.scen)), el('td', 'num ' + tone(r.at.delta), signed(r.at.delta)), el('td', 'num ' + tone(r.cum), signed(r.cum)));
+      if (n !== 'Your settings') tr.addEventListener('click', () => { sim.cpn = c; drawSim(); });
+      tb.append(tr);
+    }
+    t.append(thead, tb);
+    cmp.append(t);
+    $('#s-refnote').textContent = REF ? `Base = ${fmtPct2(REF.rate)}, the nominal-weighted coupon of ${REF.desc}. Favourable −1.00 pp, adverse +2.00 pp. Share refinanced (${sim.share}%) and tenor apply to every scenario.` : '';
     drawSimCost(cEl, m);
     drawSimWall(wEl, m);
   }
@@ -1278,7 +1687,7 @@ dash.calc('bonds_eur', {
   }
 
   // ---------- main draw ----------
-  const chartEls = ['#c-wall', '#c-donut', '#c-legend', '#c-bubble', '#c-detail', '#c-gantt', '#c-vintage', '#c-cost', '#s-out', '#s-cost', '#s-wall'].map((s) => $(s));
+  const chartEls = ['#c-wall', '#c-donut', '#c-legend', '#c-bubble', '#c-detail', '#c-gantt', '#c-vintage', '#c-cost', '#s-out', '#s-cost', '#s-wall', '#s-compare', '#c-insights', '#c-conc', '#m-audit'].map((s) => $(s));
   function draw() {
     const all = merged();
     const p = P();
@@ -1288,8 +1697,18 @@ dash.calc('bonds_eur', {
     const cs = scaleFor(all, p.colorby in DIMS ? p.colorby : 'currency');
     drawControls(all, p);
     drawRanges(all, p);
+    $('#gb-ref').textContent = fmtDate(new Date());
+    if (!simInit) {
+      REF = refLevel(all);
+      if (REF) { SIM_DEF.cpn = Math.round(REF.rate / 0.05) * 0.05; sim.cpn = SIM_DEF.cpn; buildPresets(); }
+      simInit = true;
+    }
     simRows = filtered(all, { ...p, status: 'live' });
     drawSim();
+    drawFindings($('#c-insights'), filtered(all, { ...p, status: 'live' }), all);
+    drawConc($('#c-conc'), filtered(all, { ...p, status: 'live' }));
+    drawWallText(filtered(all, p, 'year'), p);
+    drawMethod(all);
     drawKpis(rows, all, p);
     drawWall($('#c-wall'), filtered(all, p, 'year'), all, p, cs);
     drawMix($('#c-donut'), $('#c-legend'), filtered(all, p, DIMS[p.mixby in DIMS ? p.mixby : 'currency'].param), all, p);

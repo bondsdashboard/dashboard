@@ -62,6 +62,20 @@ def known_issuer(line):
     return None
 
 
+def doc_links(html):
+    """ISIN -> link of the official document grenke lists for it (Final Terms, prospectus, pricing supplement)."""
+    soup = BeautifulSoup(html, "html.parser")
+    links = {}
+    for a in soup.find_all("a", href=True):
+        text = re.sub(r"\s+", " ", a.get_text(" ")).strip()
+        href = a["href"]
+        if len(text) > 160 or ".pdf" not in href.lower():
+            continue
+        for isin in re.findall(r"\b[A-Z]{2}[A-Z0-9]{9}\d\b", text):
+            links.setdefault(isin, requests.compat.urljoin(BONDS_URL, href))
+    return links
+
+
 def page_lines(html):
     soup = BeautifulSoup(html, "html.parser")
     for t in soup(["script", "style", "noscript", "nav", "header", "footer"]):
@@ -134,6 +148,15 @@ def main():
     r = requests.get(BONDS_URL, headers=HEADERS, timeout=60)
     r.raise_for_status()
     bonds = parse_bonds(page_lines(r.text))
+    docs = doc_links(r.text)
+    for b in bonds:
+        b["doc_url"] = docs.get(b["isin"], "")
+        b["doc_type"] = (
+            "Not linked" if not b["doc_url"]
+            else "Prospectus" if b["instrument"].startswith("AT1")
+            else "Final terms" if b["issuer"].lower().startswith("grenke finance")
+            else "Pricing supplement"
+        )
     if len(bonds) < max(5, int(len(old) * 0.7)):
         sys.exit(f"Only {len(bonds)} bonds parsed (had {len(old)}); page layout may have changed. Keeping old data.")
 

@@ -25,3 +25,14 @@ To refresh and republish by hand: **Actions → Update data and publish site →
 | `scripts/update_data.py` | The refresh script |
 
 Amounts are nominal, not market value. Indicative analysis, not an official grenke publication.
+
+## Checks
+
+`tests/check_dashboard.py` opens the page in headless Chromium and compares the KPI cards, table totals, simulator results and concentration figures with values computed independently in Python from `data/*.json` (17 checks). Run it with a local copy of `d3.min.js`:
+
+```
+pip install playwright && playwright install chromium
+python tests/check_dashboard.py path/to/d3.min.js
+```
+
+A backup of the version before the analysis upgrade is on the `backup-v1` branch.
