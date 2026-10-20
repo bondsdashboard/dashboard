@@ -95,6 +95,14 @@ try:
         pg.click("#f-ccy .gb-chip >> text=EUR"); pg.wait_for_timeout(200)
         eur_only = sum(b["eur"] for b in live if b["currency"] == "EUR")
         check("Currency filter EUR → KPI equals EUR-only sum", pg.inner_text("#k1") == fmt_eur(eur_only), pg.inner_text("#k1"))
+        # 7. World map: clicking a country filters every figure to that country
+        pg.click("#f-reset"); pg.wait_for_timeout(250)
+        check("World map drawn with issuer countries", pg.locator("#c-map path.land.has").count() >= 5, pg.locator("#c-map path.land.has").count())
+        pg.locator("#c-maplist .gb-mrow", has_text="Switzerland").click(); pg.wait_for_timeout(250)
+        ch = sum(b["eur"] for b in live if b["country"] == "Switzerland")
+        check("Map filter Switzerland → KPI equals Swiss sum", pg.inner_text("#k1") == fmt_eur(ch), pg.inner_text("#k1"))
+        pg.locator("#c-map path.land.has").first.dispatch_event("click"); pg.wait_for_timeout(250)
+        check("Clicking a country on the map sets the country filter", "Country:" in pg.inner_text("#f-active"))
         br.close()
 finally:
     srv.terminate()

@@ -65,7 +65,7 @@ window.dash = (() => {
   const store = {};
   const calcs = {};
   const listeners = [];
-  const DEFAULTS = { status: 'live', issuer: null, ccy: null, esg: null, instrument: null, year: null, isin: null, colorby: 'currency', mixby: 'currency', cmin: null, cmax: null, ymin: null, ymax: null };
+  const DEFAULTS = { status: 'live', issuer: null, ccy: null, esg: null, instrument: null, year: null, isin: null, colorby: 'currency', mixby: 'currency', cmin: null, cmax: null, ymin: null, ymax: null, country: null };
   let params = { ...DEFAULTS };
   const LIGHT = ['#2f6fdb', '#e07b39', '#1f9e74', '#c2417a', '#7a5bd6', '#b59a1c', '#3a9fb8', '#8c6b52'];
   const DARK = ['#6b9cff', '#f59a5c', '#43c496', '#e56a9e', '#9d82f0', '#d4b83a', '#5ec3dc', '#b8917a'];
@@ -112,7 +112,7 @@ window.dash = (() => {
     } catch (e) { store[id] = { status: 'error', data: [], message: String(e) }; }
   }
   window.addEventListener('DOMContentLoaded', async () => {
-    await Promise.all([load('bonds', 'data/bonds.json'), load('fx', 'data/fx.json'), load('meta', 'data/meta.json')]);
+    await Promise.all([load('bonds', 'data/bonds.json'), load('fx', 'data/fx.json'), load('meta', 'data/meta.json'), load('world', 'data/world.json')]);
     run(); notify();
     const m = store.meta && store.meta.status === 'ok' ? store.meta.data : null;
     const el = document.getElementById('site-updated');
@@ -366,6 +366,29 @@ window.dash = (() => {
 .gb .gb-concepts b{display:block;color:var(--color-fg);font-weight:600;font-size:12px;margin-bottom:2px}
 .gb .gb-table td.muted{color:var(--color-fg-muted)}
 
+/* ---------- world map ---------- */
+.gb .gb-mapwrap{display:grid;grid-template-columns:minmax(0,2.3fr) minmax(0,1fr);gap:28px;align-items:center}
+@media (max-width:900px){.gb .gb-mapwrap{grid-template-columns:minmax(0,1fr)}}
+.gb .gb-map svg{display:block;overflow:hidden;border-radius:6px}
+.gb .gb-map .land{stroke:var(--color-panel);stroke-width:.6;transition:fill-opacity 160ms}
+.gb .gb-map .land.has{cursor:pointer}
+.gb .gb-map .land.has:hover{fill-opacity:1 !important}
+.gb .gb-map .sel{stroke:var(--gb-c3);stroke-width:1.6}
+.gb .gb-map .lbl{font-size:11px;font-weight:500;fill:var(--color-fg);paint-order:stroke;stroke:var(--color-panel);stroke-width:3px;stroke-linejoin:round;pointer-events:none}
+.gb .gb-map .lbl .s{fill:var(--color-fg-muted);font-weight:400}
+.gb .gb-map .arc{fill:none;stroke-width:1.2;stroke-dasharray:3 3;opacity:.75;pointer-events:none}
+.gb .gb-map .grat{fill:none;stroke:var(--cds-chart-grid);stroke-width:.5}
+.gb .gb-maplist{display:flex;flex-direction:column}
+.gb .gb-mrow{font:inherit;display:grid;grid-template-columns:10px 1fr auto;gap:4px 10px;align-items:center;padding:9px 6px;border:0;border-bottom:1px solid var(--gb-hair);background:transparent;color:var(--color-fg);cursor:pointer;text-align:left;border-radius:4px}
+.gb .gb-mrow:last-child{border-bottom:0}
+.gb .gb-mrow:hover,.gb .gb-mrow[aria-pressed=true]{background:var(--color-bg)}
+.gb .gb-mrow[aria-pressed=true]{box-shadow:inset 2px 0 0 var(--gb-c3)}
+.gb .gb-mrow .n{font-size:13px;font-weight:500}
+.gb .gb-mrow .v{font-size:13px;text-align:right;font-variant-numeric:tabular-nums}
+.gb .gb-mrow .d{grid-column:2 / 4;font-size:11.5px;color:var(--color-fg-muted);display:flex;justify-content:space-between;gap:8px}
+.gb .gb-mrow i{width:10px;height:10px;border-radius:2px;display:block}
+.gb .gb-mrow.hub i{border-radius:50%;background:transparent !important;border:2px solid var(--gb-c3)}
+
 /* ---------- misc ---------- */
 .gb .gb-tip{position:absolute;pointer-events:none;background:var(--cds-surface-popover);border:1px solid var(--cds-border);border-radius:6px;box-shadow:var(--cds-shadow-popover);padding:8px 11px;font-size:12px;z-index:10;opacity:0;transition:opacity 120ms;max-width:18rem;min-width:11rem}
 .gb .gb-tip.on{opacity:1}
@@ -384,6 +407,7 @@ window.dash = (() => {
 }
 </style>
 
+<script src="d3geo.js"></script>
 <div class="gb" id="gb">
   <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="gb-glow" filterUnits="userSpaceOnUse" x="-2000" y="-2000" width="6000" height="6000"><feGaussianBlur stdDeviation="3.2" result="b"/><feColorMatrix in="b" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 .75 0" result="bb"/><feMerge><feMergeNode in="bb"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs></svg>
   <header class="gb-head" id="overview">
@@ -415,10 +439,6 @@ window.dash = (() => {
     <div class="gb-kpi" data-k="k7"><div class="gb-klabel">Weighted avg. life<i class="gb-i" tabindex="0" aria-label="Definition">i</i></div><div class="gb-kval dash-skeleton" id="k7">—</div><div class="gb-ksub" id="k7s"></div></div>
   </section>
 
-  <section class="gb-card" id="findings">
-    <div class="gb-ch"><div><h2 class="gb-ct">Key findings</h2><p class="gb-cn">Rule-based observations computed from the bonds in the current filters. Each one states its evidence, period, sources and limits; none of them is a forecast.</p></div></div>
-    <div class="gb-insights" id="c-insights" data-source="bonds bonds_eur"></div>
-  </section>
 
   <div class="gb-grid">
     <section class="gb-card" id="maturity-wall">
@@ -433,6 +453,15 @@ window.dash = (() => {
       <div class="gb-mix"><div class="gb-donut gb-chart" id="c-donut" data-source="bonds bonds_eur" style="min-height:220px"></div><div class="gb-legend" id="c-legend" data-source="bonds bonds_eur"></div></div>
     </section>
   </div>
+
+  <section class="gb-card" id="world-map">
+    <div class="gb-ch"><div><h2 class="gb-ct">Where the bonds are issued</h2><p class="gb-cn">Issued nominal by the issuing entity’s country, EUR equivalent · dashed lines show the grenke AG guarantee · click a country to filter everything</p></div><div class="gb-seg" id="map-view"></div></div>
+    <div class="gb-mapwrap">
+      <div class="gb-chart gb-map" id="c-map" data-source="world bonds bonds_eur" style="min-height:300px"></div>
+      <div class="gb-maplist" id="c-maplist" data-source="bonds bonds_eur"></div>
+    </div>
+    <p class="gb-cnote" id="map-note"></p>
+  </section>
 
   <div class="gb-grid">
     <section class="gb-card" id="coupon-map">
@@ -508,7 +537,12 @@ window.dash = (() => {
     </div>
   </section>
 
-<section class="gb-card" id="methodology">
+  <section class="gb-card" id="findings">
+    <div class="gb-ch"><div><h2 class="gb-ct">Key findings</h2><p class="gb-cn">Rule-based observations computed from the bonds in the current filters. Each one states its evidence, period, sources and limits; none of them is a forecast.</p></div></div>
+    <div class="gb-insights" id="c-insights" data-source="bonds bonds_eur"></div>
+  </section>
+
+  <section class="gb-card" id="methodology">
     <div class="gb-ch"><div><h2 class="gb-ct">Methodology, sources &amp; data audit</h2><p class="gb-cn">What the numbers are, where they come from, and what they cannot tell you.</p></div></div>
     <div class="gb-method">
       <div>
@@ -667,6 +701,7 @@ dash.calc('bonds_eur', {
         if (d.param !== skip && p[d.param] && d.key(r) !== p[d.param]) return false;
       }
       if (skip !== 'year' && p.year && r.year !== p.year) return false;
+      if (skip !== 'country' && p.country && r.country !== p.country) return false;
       if (p.cmin != null && r.coupon < p.cmin) return false;
       if (p.cmax != null && r.coupon > p.cmax) return false;
       if (p.ymin != null && r.maturity && +r.year < p.ymin) return false;
@@ -776,6 +811,7 @@ dash.calc('bonds_eur', {
 
     const act = [];
     for (const [k, d] of Object.entries(DIMS)) if (p[d.param]) act.push([d.label + ': ' + p[d.param], { [d.param]: null }]);
+    if (p.country) act.push(['Country: ' + p.country, { country: null }]);
     if (p.year) act.push(['Maturity year: ' + p.year, { year: null }]);
     if (p.cmin != null || p.cmax != null) act.push([`Coupon: ${fmtCpn(p.cmin ?? BOUNDS.cmin)} – ${fmtCpn(p.cmax ?? BOUNDS.cmax)}`, { cmin: null, cmax: null }]);
     if (p.ymin != null || p.ymax != null) act.push([`Maturity: ${p.ymin ?? BOUNDS.ymin} – ${p.ymax ?? BOUNDS.ymax}`, { ymin: null, ymax: null }]);
@@ -788,7 +824,7 @@ dash.calc('bonds_eur', {
 
   $('#f-mix').addEventListener('change', (e) => dash.setParams({ mixby: e.target.value }));
   $('#f-q').addEventListener('input', (e) => { q = e.target.value.trim().toLowerCase(); draw(); });
-  $('#f-reset').addEventListener('click', () => { q = ''; $('#f-q').value = ''; Object.assign(sim, SIM_DEF); dash.resetParams(); dash.setParams({ cmin: null, cmax: null, ymin: null, ymax: null }); });
+  $('#f-reset').addEventListener('click', () => { q = ''; $('#f-q').value = ''; Object.assign(sim, SIM_DEF); dash.resetParams(); dash.setParams({ cmin: null, cmax: null, ymin: null, ymax: null, country: null }); });
 
   // ---------- KPIs + takeaway ----------
   const KDEF = {
@@ -1686,8 +1722,136 @@ dash.calc('bonds_eur', {
       .on('mouseleave', hideTip);
   }
 
+  // ---------- world map ----------
+  const GEO = () => (typeof d3.geoPath === 'function' ? d3 : window.d3geo);
+  const HUB = 'Germany';
+  let mapView = 'world';
+  let WORLD = null;
+  $('#map-view').append(...[['world', 'World'], ['europe', 'Europe']].map(([v, l]) => {
+    const b = chip(l, v === mapView, () => { mapView = v; draw(); });
+    b.dataset.v = v;
+    return b;
+  }));
+  function worldFeatures() {
+    const w = dash.data('world');
+    if (w.status !== 'ok' || !Array.isArray(w.data) || !w.data.length) return null;
+    return w.data.map((r) => ({ type: 'Feature', properties: { name: r.name }, geometry: typeof r.geo === 'string' ? JSON.parse(r.geo) : r.geo }));
+  }
+  function drawMap(elx, listEl, rows, p) {
+    document.querySelectorAll('#map-view .gb-chip').forEach((b) => b.setAttribute('aria-pressed', b.dataset.v === mapView ? 'true' : 'false'));
+    elx.replaceChildren(); listEl.replaceChildren();
+    const G = GEO();
+    if (!WORLD) WORLD = worldFeatures();
+    if (!WORLD || !G || typeof G.geoPath !== 'function') {
+      const st = dash.data('world').status;
+      const waiting = st === 'loading' || (!G && st === 'ok');
+      elx.classList.toggle('dash-skeleton', waiting);
+      if (!waiting) { const f = el('div', 'gb-fail', 'Map failed to load'); f.style.minHeight = '300px'; elx.append(f); }
+      return;
+    }
+    elx.classList.remove('dash-skeleton'); listEl.classList.remove('dash-skeleton');
+    const live = rows.filter((r) => r.status !== 'Matured');
+    const tot = d3.sum(live, (r) => r.eur);
+    const agg = new Map(d3.rollups(live, (v) => ({
+      eur: d3.sum(v, (r) => r.eur), n: v.length,
+      ccy: [...new Set(v.map((r) => r.currency))], ent: [...new Set(v.map((r) => r.issuer))],
+    }), (r) => r.country));
+    const byName = new Map(WORLD.map((f) => [f.properties.name, f]));
+    const max = d3.max([...agg.values()], (d) => d.eur) || 1;
+    const w = Math.max(300, elx.clientWidth);
+    const h = Math.round(w * (mapView === 'world' ? 0.5 : 0.66));
+    elx.style.minHeight = h + 'px';
+    const proj = G.geoNaturalEarth1();
+    if (mapView === 'world') proj.fitExtent([[6, 6], [w - 6, h - 6]], { type: 'FeatureCollection', features: WORLD });
+    else proj.fitExtent([[6, 6], [w - 6, h - 6]], { type: 'MultiPoint', coordinates: [[-11, 36], [24, 59]] });
+    const path = G.geoPath(proj);
+    const svg = svgIn(elx, w, h);
+    svg.append('path').attr('class', 'grat').attr('d', path(G.geoGraticule10()));
+    const op = d3.scaleSqrt([0, max], [0.3, 0.95]);
+    const has = (d) => agg.has(d.properties.name);
+    const tipFor = (event, name) => {
+      const a = agg.get(name);
+      if (!a) return;
+      setTip(event, name, [
+        { color: PAL[0], label: 'Issued nominal', value: fmtEUR(a.eur) },
+        { label: 'Share of selection', value: d3.format('.1%')(a.eur / tot) },
+        { label: 'Bonds', value: String(a.n) },
+        { label: 'Currencies', value: a.ccy.join(', ') },
+        { label: 'Issuer', value: a.ent.join(', ') },
+      ]);
+    };
+    svg.append('g').selectAll('path').data(WORLD).join('path')
+      .attr('d', path)
+      .attr('class', (d) => 'land' + (has(d) ? ' has' : '') + (p.country === d.properties.name ? ' sel' : ''))
+      .attr('fill', (d) => (has(d) ? PAL[0] : 'var(--gb-hair)'))
+      .attr('fill-opacity', (d) => (has(d) ? (p.country && p.country !== d.properties.name ? 0.25 : op(agg.get(d.properties.name).eur)) : 1))
+      .on('mousemove', (event, d) => tipFor(event, d.properties.name))
+      .on('mouseleave', hideTip)
+      .on('click', (event, d) => { if (has(d)) toggle('country', d.properties.name); });
+    // guarantee arcs from grenke AG (Germany)
+    const hubF = byName.get(HUB);
+    const hubP = hubF ? G.geoCentroid(hubF) : null;
+    if (hubP) {
+      const ag = svg.append('g');
+      for (const [name] of agg) {
+        if (name === HUB || !byName.get(name)) continue;
+        ag.append('path').attr('class', 'arc').attr('stroke', PAL[2]).attr('d', path({ type: 'LineString', coordinates: [hubP, G.geoCentroid(byName.get(name))] }));
+      }
+      const hp = proj(hubP);
+      if (hp) svg.append('circle').attr('cx', hp[0]).attr('cy', hp[1]).attr('r', 4).attr('fill', 'var(--color-panel)').attr('stroke', PAL[2]).attr('stroke-width', 2).attr('pointer-events', 'none');
+    }
+    // markers
+    const rs = d3.scaleSqrt([0, max], [3, mapView === 'world' ? 15 : 19]);
+    const pts = [...agg].map(([name, a]) => {
+      const f = byName.get(name);
+      if (!f) return null;
+      const xy = proj(G.geoCentroid(f));
+      return xy ? { name, a, x: xy[0], y: xy[1], r: rs(a.eur) } : null;
+    }).filter(Boolean).sort((a, b) => b.a.eur - a.a.eur);
+    svg.append('g').selectAll('circle').data(pts).join('circle')
+      .attr('class', 'hit glow')
+      .attr('cx', (d) => d.x).attr('cy', (d) => d.y).attr('r', (d) => d.r)
+      .attr('fill', PAL[0]).attr('fill-opacity', (d) => (p.country && p.country !== d.name ? 0.3 : 0.85))
+      .attr('stroke', (d) => (p.country === d.name ? PAL[2] : 'var(--color-panel)')).attr('stroke-width', (d) => (p.country === d.name ? 2.5 : 1.5))
+      .on('mousemove', (event, d) => tipFor(event, d.name))
+      .on('mouseleave', hideTip)
+      .on('click', (event, d) => toggle('country', d.name));
+    // labels, skipped where they would collide
+    const placed = [];
+    const lg = svg.append('g');
+    const hit = (b) => placed.some((q) => b.x < q.x + q.width + 2 && b.x + b.width + 2 > q.x && b.y < q.y + q.height && b.y + b.height > q.y);
+    for (const d of pts) placed.push({ x: d.x - d.r, y: d.y - d.r, width: 2 * d.r, height: 2 * d.r });
+    for (const d of pts) {
+      for (const side of [1, -1]) {
+        const t = lg.append('text').attr('class', 'lbl').attr('y', d.y).attr('dy', '0.35em')
+          .attr('x', d.x + side * (d.r + 5)).attr('text-anchor', side > 0 ? 'start' : 'end');
+        t.append('tspan').text(d.name + ' ');
+        t.append('tspan').attr('class', 's').text(fmtEUR(d.a.eur));
+        const b = t.node().getBBox();
+        if (!hit(b) && b.x >= 0 && b.x + b.width <= w && b.y >= 0 && b.y + b.height <= h) { placed.push(b); break; }
+        t.remove();
+      }
+    }
+    // side list
+    const list = [...agg].sort((a, b) => b[1].eur - a[1].eur);
+    for (const [name, a] of list) {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'gb-mrow' + (name === HUB ? ' hub' : '');
+      b.setAttribute('aria-pressed', p.country === name ? 'true' : 'false');
+      const sw = el('i'); sw.style.background = PAL[0]; sw.style.opacity = op(a.eur);
+      const d = el('div', 'd');
+      d.append(el('span', null, `${a.ent.join(', ')}${name === HUB ? ' · guarantor' : ''}`), el('span', null, `${d3.format('.1%')(a.eur / tot)} · ${a.n} bond${a.n === 1 ? '' : 's'}`));
+      b.append(sw, el('span', 'n', name), el('span', 'v', fmtEUR(a.eur)), d);
+      b.addEventListener('click', () => toggle('country', name));
+      listEl.append(b);
+    }
+    if (!list.length) listEl.append(el('div', 'gb-fail', 'No live bonds in this selection'));
+    const multi = live.filter((r) => r.currency !== 'EUR' && r.country === 'Ireland');
+    $('#map-note').textContent = `Country of the issuing entity, not of the investors or the currency${multi.length ? ': grenke Finance Plc (Ireland) also issues in ' + [...new Set(multi.map((r) => r.currency))].join(' and ') : ''}. Dashed lines link each issuer to grenke AG in Germany, which guarantees their bonds; the AT1 is issued by grenke AG itself. Map: Natural Earth 1:110m.`;
+  }
+
   // ---------- main draw ----------
-  const chartEls = ['#c-wall', '#c-donut', '#c-legend', '#c-bubble', '#c-detail', '#c-gantt', '#c-vintage', '#c-cost', '#s-out', '#s-cost', '#s-wall', '#s-compare', '#c-insights', '#c-conc', '#m-audit'].map((s) => $(s));
+  const chartEls = ['#c-wall', '#c-donut', '#c-legend', '#c-bubble', '#c-detail', '#c-gantt', '#c-vintage', '#c-cost', '#s-out', '#s-cost', '#s-wall', '#s-compare', '#c-insights', '#c-conc', '#m-audit', '#c-map', '#c-maplist'].map((s) => $(s));
   function draw() {
     const all = merged();
     const p = P();
@@ -1711,6 +1875,7 @@ dash.calc('bonds_eur', {
     drawMethod(all);
     drawKpis(rows, all, p);
     drawWall($('#c-wall'), filtered(all, p, 'year'), all, p, cs);
+    drawMap($('#c-map'), $('#c-maplist'), filtered(all, p, 'country'), p);
     drawMix($('#c-donut'), $('#c-legend'), filtered(all, p, DIMS[p.mixby in DIMS ? p.mixby : 'currency'].param), all, p);
     drawBubble($('#c-bubble'), rows, all, p, cs);
     drawDetail($('#c-detail'), rows, all, p, cs);
