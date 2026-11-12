@@ -1,21 +1,5 @@
 [
  {
-  "isin": "XS2063547470",
-  "issuer": "grenke Finance Plc.",
-  "issuer_short": "grenke Finance",
-  "country": "Ireland",
-  "programme": "EUR Debt Issuance Programme",
-  "instrument": "Senior bond",
-  "currency": "EUR",
-  "amount_m": 26.5,
-  "coupon_pct": 0.681,
-  "issue_date": "2019-10-09",
-  "maturity_date": "2026-10-09",
-  "esg": "Conventional",
-  "doc_url": "https://www.grenke.com/a/original/gallery/12428/files/original/a306cfa410e94619a60e8fa80ca10fa3.pdf",
-  "doc_type": "Final terms"
- },
- {
   "isin": "XS2695009998",
   "issuer": "grenke Finance Plc.",
   "issuer_short": "grenke Finance",
