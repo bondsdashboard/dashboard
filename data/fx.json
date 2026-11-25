@@ -2,31 +2,31 @@
  {
   "currency": "EUR",
   "per_eur": 1,
-  "rate_date": "2026-11-24"
+  "rate_date": "2026-11-25"
  },
  {
   "currency": "AUD",
-  "per_eur": 1.6507,
-  "rate_date": "2026-11-24"
+  "per_eur": 1.6644,
+  "rate_date": "2026-11-25"
  },
  {
   "currency": "CAD",
-  "per_eur": 1.5707,
-  "rate_date": "2026-11-24"
+  "per_eur": 1.5591,
+  "rate_date": "2026-11-25"
  },
  {
   "currency": "CHF",
-  "per_eur": 0.9183,
-  "rate_date": "2026-11-24"
+  "per_eur": 0.9085,
+  "rate_date": "2026-11-25"
  },
  {
   "currency": "HKD",
-  "per_eur": 8.597,
-  "rate_date": "2026-11-24"
+  "per_eur": 8.5709,
+  "rate_date": "2026-11-25"
  },
  {
   "currency": "JPY",
-  "per_eur": 174.39,
-  "rate_date": "2026-11-24"
+  "per_eur": 174.22,
+  "rate_date": "2026-11-25"
  }
 ]
